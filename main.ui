@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1360</width>
+    <height>768</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>AiMarketsCap HFT SYSTEM</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <widget class="QWidget" name="gridLayoutWidget_2">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>350</y>
+      <width>971</width>
+      <height>361</height>
+     </rect>
+    </property>
+    <layout class="QGridLayout" name="gridLayout_2">
+     <item row="0" column="1">
+      <widget class="QTableWidget" name="orderTable">
+       <column>
+        <property name="text">
+         <string>ID</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>Tipo</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>Dirección</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>Ejecución Tipo</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>Est. Orden</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>Precio</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>Est. Int</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>Fee</string>
+        </property>
+       </column>
+      </widget>
+     </item>
+    </layout>
+   </widget>
+   <widget class="QWidget" name="gridLayoutWidget_3">
+    <property name="geometry">
+     <rect>
+      <x>990</x>
+      <y>10</y>
+      <width>361</width>
+      <height>701</height>
+     </rect>
+    </property>
+    <layout class="QGridLayout" name="gridLayout_3">
+     <item row="0" column="0">
+      <widget class="QTabWidget" name="tabWidget">
+       <property name="currentIndex">
+        <number>1</number>
+       </property>
+       <widget class="QWidget" name="tab">
+        <attribute name="title">
+         <string>Operaciones</string>
+        </attribute>
+        <widget class="QPushButton" name="pushButton_2">
+         <property name="geometry">
+          <rect>
+           <x>20</x>
+           <y>20</y>
+           <width>321</width>
+           <height>131</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Iniciar HFT</string>
+         </property>
+        </widget>
+        <widget class="QPushButton" name="pushButton_4">
+         <property name="geometry">
+          <rect>
+           <x>20</x>
+           <y>330</y>
+           <width>321</width>
+           <height>151</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Reiniciar Grid</string>
+         </property>
+        </widget>
+        <widget class="QPushButton" name="pushButton_3">
+         <property name="geometry">
+          <rect>
+           <x>20</x>
+           <y>170</y>
+           <width>321</width>
+           <height>141</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Cancelar Órdenes</string>
+         </property>
+        </widget>
+        <widget class="QPushButton" name="pushButton_5">
+         <property name="geometry">
+          <rect>
+           <x>20</x>
+           <y>500</y>
+           <width>321</width>
+           <height>151</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Cerrar  Trade</string>
+         </property>
+        </widget>
+       </widget>
+       <widget class="QWidget" name="tab_2">
+        <attribute name="title">
+         <string>Utilidades</string>
+        </attribute>
+       </widget>
+      </widget>
+     </item>
+    </layout>
+   </widget>
+   <widget class="QSlider" name="verticalSlider">
+    <property name="geometry">
+     <rect>
+      <x>850</x>
+      <y>110</y>
+      <width>16</width>
+      <height>160</height>
+     </rect>
+    </property>
+    <property name="orientation">
+     <enum>Qt::Vertical</enum>
+    </property>
+   </widget>
+   <widget class="QTextEdit" name="textEdit">
+    <property name="geometry">
+     <rect>
+      <x>880</x>
+      <y>100</y>
+      <width>104</width>
+      <height>70</height>
+     </rect>
+    </property>
+   </widget>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>1360</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuHFT">
+    <property name="title">
+     <string>HFT</string>
+    </property>
+    <addaction name="actionPares"/>
+    <addaction name="actionGrids"/>
+   </widget>
+   <addaction name="menuHFT"/>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+  <action name="actionPares">
+   <property name="text">
+    <string>Pares</string>
+   </property>
+  </action>
+  <action name="actionGrids">
+   <property name="text">
+    <string>Grids</string>
+   </property>
+  </action>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

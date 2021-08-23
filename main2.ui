@@ -1,0 +1,765 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1473</width>
+    <height>768</height>
+   </rect>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>1200</width>
+    <height>768</height>
+   </size>
+  </property>
+  <property name="windowTitle">
+   <string>MainWindow</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <widget class="QWidget" name="gridLayoutWidget">
+    <property name="geometry">
+     <rect>
+      <x>0</x>
+      <y>0</y>
+      <width>1471</width>
+      <height>741</height>
+     </rect>
+    </property>
+    <layout class="QGridLayout" name="gridLayout">
+     <item row="0" column="0">
+      <widget class="QTabWidget" name="tabWidget">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>1450</width>
+         <height>710</height>
+        </size>
+       </property>
+       <property name="whatsThis">
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+       </property>
+       <property name="tabPosition">
+        <enum>QTabWidget::North</enum>
+       </property>
+       <property name="tabShape">
+        <enum>QTabWidget::Rounded</enum>
+       </property>
+       <property name="currentIndex">
+        <number>0</number>
+       </property>
+       <property name="documentMode">
+        <bool>false</bool>
+       </property>
+       <property name="tabsClosable">
+        <bool>false</bool>
+       </property>
+       <widget class="QWidget" name="main_tab">
+        <property name="focusPolicy">
+         <enum>Qt::StrongFocus</enum>
+        </property>
+        <attribute name="title">
+         <string>HFT MAIN</string>
+        </attribute>
+        <widget class="QFrame" name="frame">
+         <property name="geometry">
+          <rect>
+           <x>10</x>
+           <y>110</y>
+           <width>1111</width>
+           <height>81</height>
+          </rect>
+         </property>
+         <property name="frameShape">
+          <enum>QFrame::Box</enum>
+         </property>
+         <property name="frameShadow">
+          <enum>QFrame::Raised</enum>
+         </property>
+         <widget class="QLabel" name="label">
+          <property name="geometry">
+           <rect>
+            <x>10</x>
+            <y>10</y>
+            <width>69</width>
+            <height>19</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>SYMBOL:</string>
+          </property>
+         </widget>
+         <widget class="QLCDNumber" name="lcdTicker">
+          <property name="geometry">
+           <rect>
+            <x>410</x>
+            <y>10</y>
+            <width>209</width>
+            <height>59</height>
+           </rect>
+          </property>
+          <property name="frameShape">
+           <enum>QFrame::NoFrame</enum>
+          </property>
+          <property name="digitCount">
+           <number>8</number>
+          </property>
+         </widget>
+         <widget class="QLabel" name="label_2">
+          <property name="geometry">
+           <rect>
+            <x>300</x>
+            <y>10</y>
+            <width>111</width>
+            <height>19</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>PRICE:</string>
+          </property>
+         </widget>
+         <widget class="QLCDNumber" name="walletcapitalLCD">
+          <property name="geometry">
+           <rect>
+            <x>780</x>
+            <y>10</y>
+            <width>209</width>
+            <height>59</height>
+           </rect>
+          </property>
+          <property name="frameShape">
+           <enum>QFrame::NoFrame</enum>
+          </property>
+          <property name="digitCount">
+           <number>8</number>
+          </property>
+         </widget>
+         <widget class="QLabel" name="label_3">
+          <property name="geometry">
+           <rect>
+            <x>650</x>
+            <y>10</y>
+            <width>121</width>
+            <height>19</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>WALLET CAPITAL:</string>
+          </property>
+         </widget>
+         <widget class="QLabel" name="symbolLabel">
+          <property name="geometry">
+           <rect>
+            <x>70</x>
+            <y>20</y>
+            <width>201</width>
+            <height>41</height>
+           </rect>
+          </property>
+          <property name="font">
+           <font>
+            <pointsize>24</pointsize>
+           </font>
+          </property>
+          <property name="frameShape">
+           <enum>QFrame::NoFrame</enum>
+          </property>
+          <property name="frameShadow">
+           <enum>QFrame::Raised</enum>
+          </property>
+          <property name="text">
+           <string>1INCH/USDT</string>
+          </property>
+         </widget>
+        </widget>
+        <widget class="QFrame" name="frame_2">
+         <property name="geometry">
+          <rect>
+           <x>10</x>
+           <y>410</y>
+           <width>1111</width>
+           <height>261</height>
+          </rect>
+         </property>
+         <property name="frameShape">
+          <enum>QFrame::Box</enum>
+         </property>
+         <property name="frameShadow">
+          <enum>QFrame::Raised</enum>
+         </property>
+         <widget class="QTableWidget" name="orderTable">
+          <property name="geometry">
+           <rect>
+            <x>10</x>
+            <y>10</y>
+            <width>1091</width>
+            <height>241</height>
+           </rect>
+          </property>
+          <property name="frameShape">
+           <enum>QFrame::NoFrame</enum>
+          </property>
+          <attribute name="horizontalHeaderDefaultSectionSize">
+           <number>122</number>
+          </attribute>
+          <attribute name="horizontalHeaderMinimumSectionSize">
+           <number>34</number>
+          </attribute>
+          <column>
+           <property name="text">
+            <string>ID</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Tipo</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Dirección</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Ejecución Tipo</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Estado de la Orden</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Precio</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Est. Int</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Fee</string>
+           </property>
+          </column>
+         </widget>
+        </widget>
+        <widget class="QFrame" name="frame_3">
+         <property name="geometry">
+          <rect>
+           <x>10</x>
+           <y>210</y>
+           <width>1111</width>
+           <height>81</height>
+          </rect>
+         </property>
+         <property name="frameShape">
+          <enum>QFrame::Box</enum>
+         </property>
+         <property name="frameShadow">
+          <enum>QFrame::Raised</enum>
+         </property>
+         <widget class="QLCDNumber" name="usedcapitalLcd">
+          <property name="geometry">
+           <rect>
+            <x>120</x>
+            <y>10</y>
+            <width>209</width>
+            <height>59</height>
+           </rect>
+          </property>
+          <property name="frameShape">
+           <enum>QFrame::NoFrame</enum>
+          </property>
+          <property name="digitCount">
+           <number>8</number>
+          </property>
+         </widget>
+         <widget class="QLabel" name="label_5">
+          <property name="geometry">
+           <rect>
+            <x>10</x>
+            <y>10</y>
+            <width>111</width>
+            <height>19</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>USED CAPITAL</string>
+          </property>
+         </widget>
+         <widget class="QProgressBar" name="usedcapitalBar">
+          <property name="geometry">
+           <rect>
+            <x>400</x>
+            <y>20</y>
+            <width>691</width>
+            <height>41</height>
+           </rect>
+          </property>
+          <property name="value">
+           <number>0</number>
+          </property>
+         </widget>
+        </widget>
+        <widget class="QFrame" name="frame_5">
+         <property name="geometry">
+          <rect>
+           <x>10</x>
+           <y>310</y>
+           <width>1111</width>
+           <height>81</height>
+          </rect>
+         </property>
+         <property name="frameShape">
+          <enum>QFrame::Box</enum>
+         </property>
+         <property name="frameShadow">
+          <enum>QFrame::Raised</enum>
+         </property>
+         <widget class="QLCDNumber" name="lcdTicker_13">
+          <property name="geometry">
+           <rect>
+            <x>120</x>
+            <y>10</y>
+            <width>209</width>
+            <height>59</height>
+           </rect>
+          </property>
+          <property name="frameShape">
+           <enum>QFrame::NoFrame</enum>
+          </property>
+          <property name="digitCount">
+           <number>8</number>
+          </property>
+         </widget>
+         <widget class="QLabel" name="label_18">
+          <property name="geometry">
+           <rect>
+            <x>10</x>
+            <y>10</y>
+            <width>111</width>
+            <height>19</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>POSITION:</string>
+          </property>
+         </widget>
+         <widget class="QLabel" name="label_19">
+          <property name="geometry">
+           <rect>
+            <x>360</x>
+            <y>10</y>
+            <width>111</width>
+            <height>19</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>QUANTITY:</string>
+          </property>
+         </widget>
+         <widget class="QLCDNumber" name="lcdTicker_14">
+          <property name="geometry">
+           <rect>
+            <x>470</x>
+            <y>10</y>
+            <width>209</width>
+            <height>59</height>
+           </rect>
+          </property>
+          <property name="frameShape">
+           <enum>QFrame::NoFrame</enum>
+          </property>
+          <property name="digitCount">
+           <number>8</number>
+          </property>
+         </widget>
+        </widget>
+        <widget class="QFrame" name="frame_6">
+         <property name="geometry">
+          <rect>
+           <x>10</x>
+           <y>10</y>
+           <width>1111</width>
+           <height>81</height>
+          </rect>
+         </property>
+         <property name="frameShape">
+          <enum>QFrame::Box</enum>
+         </property>
+         <property name="frameShadow">
+          <enum>QFrame::Raised</enum>
+         </property>
+         <widget class="QLabel" name="label_4">
+          <property name="geometry">
+           <rect>
+            <x>10</x>
+            <y>10</y>
+            <width>69</width>
+            <height>19</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>ACTIVE HFT</string>
+          </property>
+         </widget>
+         <widget class="QLabel" name="label_6">
+          <property name="geometry">
+           <rect>
+            <x>620</x>
+            <y>10</y>
+            <width>111</width>
+            <height>19</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>LEVERAGE</string>
+          </property>
+         </widget>
+         <widget class="QLabel" name="activehftLabel">
+          <property name="geometry">
+           <rect>
+            <x>10</x>
+            <y>30</y>
+            <width>201</width>
+            <height>41</height>
+           </rect>
+          </property>
+          <property name="font">
+           <font>
+            <pointsize>18</pointsize>
+           </font>
+          </property>
+          <property name="frameShape">
+           <enum>QFrame::NoFrame</enum>
+          </property>
+          <property name="frameShadow">
+           <enum>QFrame::Raised</enum>
+          </property>
+          <property name="text">
+           <string>Bitcoin 150</string>
+          </property>
+         </widget>
+         <widget class="QLabel" name="leverageLabel">
+          <property name="geometry">
+           <rect>
+            <x>620</x>
+            <y>30</y>
+            <width>201</width>
+            <height>41</height>
+           </rect>
+          </property>
+          <property name="font">
+           <font>
+            <pointsize>18</pointsize>
+           </font>
+          </property>
+          <property name="frameShape">
+           <enum>QFrame::NoFrame</enum>
+          </property>
+          <property name="frameShadow">
+           <enum>QFrame::Raised</enum>
+          </property>
+          <property name="text">
+           <string>Bitcoin 150</string>
+          </property>
+         </widget>
+         <widget class="QLabel" name="marginLabel">
+          <property name="geometry">
+           <rect>
+            <x>800</x>
+            <y>30</y>
+            <width>201</width>
+            <height>41</height>
+           </rect>
+          </property>
+          <property name="font">
+           <font>
+            <pointsize>18</pointsize>
+           </font>
+          </property>
+          <property name="frameShape">
+           <enum>QFrame::NoFrame</enum>
+          </property>
+          <property name="frameShadow">
+           <enum>QFrame::Raised</enum>
+          </property>
+          <property name="text">
+           <string>Bitcoin 150</string>
+          </property>
+         </widget>
+         <widget class="QLabel" name="label_7">
+          <property name="geometry">
+           <rect>
+            <x>800</x>
+            <y>10</y>
+            <width>111</width>
+            <height>19</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>MARGIN TYPE</string>
+          </property>
+         </widget>
+         <widget class="QLabel" name="label_8">
+          <property name="geometry">
+           <rect>
+            <x>220</x>
+            <y>10</y>
+            <width>69</width>
+            <height>19</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>EXCHANGE</string>
+          </property>
+         </widget>
+         <widget class="QLabel" name="exchangeLabel">
+          <property name="geometry">
+           <rect>
+            <x>220</x>
+            <y>30</y>
+            <width>201</width>
+            <height>41</height>
+           </rect>
+          </property>
+          <property name="font">
+           <font>
+            <pointsize>18</pointsize>
+           </font>
+          </property>
+          <property name="frameShape">
+           <enum>QFrame::NoFrame</enum>
+          </property>
+          <property name="frameShadow">
+           <enum>QFrame::Raised</enum>
+          </property>
+          <property name="text">
+           <string>Bitcoin 150</string>
+          </property>
+         </widget>
+         <widget class="QLabel" name="thresholdLabel">
+          <property name="geometry">
+           <rect>
+            <x>420</x>
+            <y>30</y>
+            <width>201</width>
+            <height>41</height>
+           </rect>
+          </property>
+          <property name="font">
+           <font>
+            <pointsize>18</pointsize>
+           </font>
+          </property>
+          <property name="frameShape">
+           <enum>QFrame::NoFrame</enum>
+          </property>
+          <property name="frameShadow">
+           <enum>QFrame::Raised</enum>
+          </property>
+          <property name="text">
+           <string>Bitcoin 150</string>
+          </property>
+         </widget>
+         <widget class="QLabel" name="label_9">
+          <property name="geometry">
+           <rect>
+            <x>420</x>
+            <y>10</y>
+            <width>111</width>
+            <height>19</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>THRESHOLD</string>
+          </property>
+         </widget>
+        </widget>
+        <widget class="QTabWidget" name="tabWidget_2">
+         <property name="geometry">
+          <rect>
+           <x>1140</x>
+           <y>10</y>
+           <width>299</width>
+           <height>661</height>
+          </rect>
+         </property>
+         <property name="tabShape">
+          <enum>QTabWidget::Rounded</enum>
+         </property>
+         <property name="currentIndex">
+          <number>0</number>
+         </property>
+         <widget class="QWidget" name="tab">
+          <attribute name="title">
+           <string>CONTROL</string>
+          </attribute>
+          <widget class="QPushButton" name="pushButton_2">
+           <property name="geometry">
+            <rect>
+             <x>20</x>
+             <y>10</y>
+             <width>261</width>
+             <height>121</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>INIT HFT</string>
+           </property>
+          </widget>
+          <widget class="QPushButton" name="pushButton_4">
+           <property name="geometry">
+            <rect>
+             <x>20</x>
+             <y>330</y>
+             <width>261</width>
+             <height>131</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>CANCELL ALL ORDERS</string>
+           </property>
+          </widget>
+          <widget class="QPushButton" name="pushButton_3">
+           <property name="geometry">
+            <rect>
+             <x>20</x>
+             <y>170</y>
+             <width>261</width>
+             <height>121</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>RESTART HFT</string>
+           </property>
+          </widget>
+          <widget class="QPushButton" name="pushButton_5">
+           <property name="geometry">
+            <rect>
+             <x>20</x>
+             <y>490</y>
+             <width>261</width>
+             <height>131</height>
+            </rect>
+           </property>
+           <property name="styleSheet">
+            <string notr="true"/>
+           </property>
+           <property name="text">
+            <string>CLOSE TRADE</string>
+           </property>
+          </widget>
+         </widget>
+         <widget class="QWidget" name="tab_3">
+          <attribute name="title">
+           <string>UTILS</string>
+          </attribute>
+         </widget>
+        </widget>
+       </widget>
+       <widget class="QWidget" name="tab_2">
+        <attribute name="title">
+         <string>SYMBOLS</string>
+        </attribute>
+        <widget class="QTableView" name="tableView">
+         <property name="geometry">
+          <rect>
+           <x>10</x>
+           <y>10</y>
+           <width>1411</width>
+           <height>301</height>
+          </rect>
+         </property>
+        </widget>
+       </widget>
+       <widget class="QWidget" name="tab_4">
+        <attribute name="title">
+         <string>GRIDS</string>
+        </attribute>
+        <widget class="QTableView" name="tableView_2">
+         <property name="geometry">
+          <rect>
+           <x>10</x>
+           <y>10</y>
+           <width>1421</width>
+           <height>241</height>
+          </rect>
+         </property>
+        </widget>
+       </widget>
+       <widget class="QWidget" name="tab_5">
+        <attribute name="title">
+         <string>LOG</string>
+        </attribute>
+        <widget class="QTextEdit" name="logText">
+         <property name="geometry">
+          <rect>
+           <x>10</x>
+           <y>10</y>
+           <width>1171</width>
+           <height>601</height>
+          </rect>
+         </property>
+         <property name="focusPolicy">
+          <enum>Qt::NoFocus</enum>
+         </property>
+         <property name="frameShape">
+          <enum>QFrame::NoFrame</enum>
+         </property>
+         <property name="frameShadow">
+          <enum>QFrame::Plain</enum>
+         </property>
+         <property name="tabStopWidth">
+          <number>120</number>
+         </property>
+        </widget>
+        <widget class="QPushButton" name="pushButton">
+         <property name="geometry">
+          <rect>
+           <x>1200</x>
+           <y>10</y>
+           <width>231</width>
+           <height>81</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>SAVE LOG</string>
+         </property>
+        </widget>
+        <widget class="QPushButton" name="pushButton_6">
+         <property name="geometry">
+          <rect>
+           <x>1200</x>
+           <y>100</y>
+           <width>231</width>
+           <height>81</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>CLEAR LOG</string>
+         </property>
+        </widget>
+       </widget>
+      </widget>
+     </item>
+    </layout>
+   </widget>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
