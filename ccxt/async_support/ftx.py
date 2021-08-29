@@ -78,6 +78,7 @@ class ftx(Exchange):
                 'fetchTrades': True,
                 'fetchTradingFees': True,
                 'fetchWithdrawals': True,
+                'setLeverage': True,
                 'withdraw': True,
             },
             'timeframes': {
@@ -1890,3 +1891,62 @@ class ftx(Exchange):
             self.throw_exactly_matched_exception(self.exceptions['exact'], error, feedback)
             self.throw_broadly_matched_exception(self.exceptions['broad'], error, feedback)
             raise ExchangeError(feedback)  # unknown message
+
+    async def set_leverage(self, leverage, symbol=None, params={}):
+        # WARNING: THIS WILL INCREASE LIQUIDATION PRICE FOR OPEN ISOLATED LONG POSITIONS
+        # AND DECREASE LIQUIDATION PRICE FOR OPEN ISOLATED SHORT POSITIONS
+        if (leverage < 1) or (leverage > 20):
+            raise BadRequest(self.id + ' leverage should be between 1 and 20')
+        request = {
+            'leverage': leverage,
+        }
+        return await self.privatePostAccountLeverage(self.extend(request, params))
+
+    def parse_income(self, income, market=None):
+        #
+        #   {
+        #       "future": "ETH-PERP",
+        #        "id": 33830,
+        #        "payment": 0.0441342,
+        #        "time": "2019-05-15T18:00:00+00:00",
+        #        "rate": 0.0001
+        #   }
+        #
+        marketId = self.safe_string(income, 'future')
+        symbol = self.safe_symbol(marketId, market)
+        amount = self.safe_number(income, 'payment')
+        code = self.safe_currency_code('USD')
+        id = self.safe_string(income, 'id')
+        timestamp = self.safe_integer(income, 'time')
+        rate = self.safe_number(income, 'rate')
+        return {
+            'info': income,
+            'symbol': symbol,
+            'code': code,
+            'timestamp': timestamp,
+            'datetime': self.iso8601(timestamp),
+            'id': id,
+            'amount': amount,
+            'rate': rate,
+        }
+
+    def parse_incomes(self, incomes, market=None, since=None, limit=None):
+        result = []
+        for i in range(0, len(incomes)):
+            entry = incomes[i]
+            parsed = self.parse_income(entry, market)
+            result.append(parsed)
+        return self.filter_by_since_limit(result, since, limit, 'timestamp')
+
+    async def fetch_funding_history(self, symbol=None, since=None, limit=None, params={}):
+        await self.load_markets()
+        method = 'private_get_funding_payments'
+        request = {}
+        market = None
+        if symbol is not None:
+            market = self.market(symbol)
+            request['future'] = market['id']
+        if since is not None:
+            request['startTime'] = since
+        response = await getattr(self, method)(self.extend(request, params))
+        return self.parse_incomes(response, market, since, limit)

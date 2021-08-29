@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1473</width>
+    <width>1480</width>
     <height>768</height>
    </rect>
   </property>
@@ -17,7 +17,7 @@
    </size>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>AiMarketsCap HFT TRADING SYSTEM</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <widget class="QWidget" name="gridLayoutWidget">
@@ -25,7 +25,7 @@
      <rect>
       <x>0</x>
       <y>0</y>
-      <width>1471</width>
+      <width>1481</width>
       <height>741</height>
      </rect>
     </property>
@@ -33,7 +33,7 @@
      <item row="0" column="0">
       <widget class="QTabWidget" name="tabWidget">
        <property name="sizePolicy">
-        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+        <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
          <horstretch>0</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
@@ -207,6 +207,9 @@
           <property name="frameShape">
            <enum>QFrame::NoFrame</enum>
           </property>
+          <property name="sortingEnabled">
+           <bool>true</bool>
+          </property>
           <attribute name="horizontalHeaderMinimumSectionSize">
            <number>122</number>
           </attribute>
@@ -291,10 +294,10 @@
          <widget class="QLCDNumber" name="lcdTicker_13">
           <property name="geometry">
            <rect>
-            <x>120</x>
-            <y>10</y>
-            <width>209</width>
-            <height>59</height>
+            <x>10</x>
+            <y>40</y>
+            <width>111</width>
+            <height>31</height>
            </rect>
           </property>
           <property name="frameShape">
@@ -320,23 +323,81 @@
          <widget class="QLabel" name="label_19">
           <property name="geometry">
            <rect>
-            <x>360</x>
+            <x>140</x>
             <y>10</y>
             <width>111</width>
             <height>19</height>
            </rect>
           </property>
           <property name="text">
-           <string>QUANTITY:</string>
+           <string>POSITION:</string>
           </property>
          </widget>
          <widget class="QLCDNumber" name="lcdTicker_14">
           <property name="geometry">
            <rect>
-            <x>470</x>
+            <x>140</x>
+            <y>40</y>
+            <width>111</width>
+            <height>31</height>
+           </rect>
+          </property>
+          <property name="frameShape">
+           <enum>QFrame::NoFrame</enum>
+          </property>
+          <property name="digitCount">
+           <number>8</number>
+          </property>
+         </widget>
+         <widget class="QLabel" name="label_20">
+          <property name="geometry">
+           <rect>
+            <x>290</x>
             <y>10</y>
-            <width>209</width>
-            <height>59</height>
+            <width>111</width>
+            <height>19</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>POSITION:</string>
+          </property>
+         </widget>
+         <widget class="QLCDNumber" name="lcdTicker_15">
+          <property name="geometry">
+           <rect>
+            <x>290</x>
+            <y>40</y>
+            <width>111</width>
+            <height>31</height>
+           </rect>
+          </property>
+          <property name="frameShape">
+           <enum>QFrame::NoFrame</enum>
+          </property>
+          <property name="digitCount">
+           <number>8</number>
+          </property>
+         </widget>
+         <widget class="QLabel" name="label_21">
+          <property name="geometry">
+           <rect>
+            <x>450</x>
+            <y>10</y>
+            <width>111</width>
+            <height>19</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>POSITION:</string>
+          </property>
+         </widget>
+         <widget class="QLCDNumber" name="lcdTicker_16">
+          <property name="geometry">
+           <rect>
+            <x>450</x>
+            <y>40</y>
+            <width>111</width>
+            <height>31</height>
            </rect>
           </property>
           <property name="frameShape">
@@ -551,9 +612,9 @@
         <widget class="QTabWidget" name="tabWidget_2">
          <property name="geometry">
           <rect>
-           <x>1140</x>
+           <x>1130</x>
            <y>10</y>
-           <width>299</width>
+           <width>307</width>
            <height>661</height>
           </rect>
          </property>
@@ -567,25 +628,29 @@
           <attribute name="title">
            <string>CONTROL</string>
           </attribute>
-          <widget class="QPushButton" name="hftinitButton">
+          <widget class="QPushButton" name="connectButton">
            <property name="geometry">
             <rect>
              <x>20</x>
              <y>10</y>
-             <width>261</width>
-             <height>121</height>
+             <width>121</width>
+             <height>71</height>
             </rect>
            </property>
            <property name="text">
-            <string>INIT HFT</string>
+            <string>CONNECT 
+TO EXCHANGE</string>
+           </property>
+           <property name="flat">
+            <bool>false</bool>
            </property>
           </widget>
-          <widget class="QPushButton" name="pushButton_4">
+          <widget class="QPushButton" name="cancellallordersButton">
            <property name="geometry">
             <rect>
-             <x>20</x>
-             <y>330</y>
-             <width>261</width>
+             <x>10</x>
+             <y>350</y>
+             <width>281</width>
              <height>131</height>
             </rect>
            </property>
@@ -593,12 +658,12 @@
             <string>CANCELL ALL ORDERS</string>
            </property>
           </widget>
-          <widget class="QPushButton" name="pushButton_3">
+          <widget class="QPushButton" name="hftrestartButton">
            <property name="geometry">
             <rect>
-             <x>20</x>
-             <y>170</y>
-             <width>261</width>
+             <x>10</x>
+             <y>220</y>
+             <width>281</width>
              <height>121</height>
             </rect>
            </property>
@@ -606,12 +671,12 @@
             <string>RESTART HFT</string>
            </property>
           </widget>
-          <widget class="QPushButton" name="pushButton_5">
+          <widget class="QPushButton" name="closetradeButton">
            <property name="geometry">
             <rect>
-             <x>20</x>
+             <x>10</x>
              <y>490</y>
-             <width>261</width>
+             <width>281</width>
              <height>131</height>
             </rect>
            </property>
@@ -620,6 +685,32 @@
            </property>
            <property name="text">
             <string>CLOSE TRADE</string>
+           </property>
+          </widget>
+          <widget class="QPushButton" name="disconnectButton">
+           <property name="geometry">
+            <rect>
+             <x>160</x>
+             <y>10</y>
+             <width>121</width>
+             <height>71</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>DISCONNECT</string>
+           </property>
+          </widget>
+          <widget class="QPushButton" name="hftinitButton">
+           <property name="geometry">
+            <rect>
+             <x>10</x>
+             <y>90</y>
+             <width>281</width>
+             <height>121</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>HFT INIT</string>
            </property>
           </widget>
          </widget>
