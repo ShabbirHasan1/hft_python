@@ -9,11 +9,7 @@ async def message_status(self, message, x):
     self.statusbar.showMessage("")
 
 
-
-
-
 class pandasModel(QAbstractTableModel):
-
     def __init__(self, data):
 
         QAbstractTableModel.__init__(self)

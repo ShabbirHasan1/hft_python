@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from sockets import positionrisk
 import pandas as pd
 
@@ -6,8 +8,9 @@ from orderManaging import puts, cancelorder
 import threading
 from multiprocessing import Pool
 
+
 async def worders(self, exchange, gamount, threshold, gsymbol, factor, ex):
-    pools = Pool(processes=2)
+    pools = Pool(processes=6)
     filled = 0
     await exchange.load_markets()
     filled = await positionrisk(self, exchange, gsymbol)
@@ -43,7 +46,6 @@ async def worders(self, exchange, gamount, threshold, gsymbol, factor, ex):
                          'N': '',
                          'l': '', 'z': ''}, ignore_index=True)
 
-
                     # self.orderTable.sortItems(4, Qt.DescendingOrder)
 
             if currentExecutionType == 'TRADE' and currentOrderStatus == 'FILLED':
@@ -68,43 +70,91 @@ async def worders(self, exchange, gamount, threshold, gsymbol, factor, ex):
 
                     if side == 'BUY' and filled == 0:
                         count = 0
-                        print('BUY TRADE FILLED ON ZERO')
                         buycero = df.loc[(df['internal_status'] == 0) & (df['side'] == 'BUY')]
                         buycero.sort_values('price', inplace=True, ascending=True)
                         price = float(df.iloc[buycero.index[0]]['price']) - threshold
-                        # print('MORE LOW BUY ORDER PRICE: ', df.iloc[buycero.index[0]]['price'])
-                        print('MAKING BUY ORDER AT PRICE  ', price)
                         pools.apply_async(puts, (gsymbol, 'BUY', gamount, price, ex), )
-                        # task_puto.delay(api_key, api_id, symbol, 'LIMIT', 'BUY', amount, price, e)
 
                     if side == 'SELL' and filled == 0:
                         count = 0
-                        print('SELL TRADE FILLED ON ZERO')
                         sellcero = df.loc[(df['internal_status'] == 0) & (df['side'] == 'SELL')]
                         sellcero.sort_values('price', inplace=True, ascending=False)
                         price = float(df.iloc[sellcero.index[0]]['price']) + threshold
-                        # print('MORE HIGH SELL ORDER PRICE: ', df.iloc[sellcero.index[0]]['price'])
-                        print('MAKING SELL ORDER AT PRICE  ', price)
                         pools.apply_async(puts, (gsymbol, 'SELL', gamount, price, ex), )
 
                     #     ***********************************
 
                     if side == 'BUY' and filled == 1:
                         p = float(price) + threshold
-                        pools.apply_async(puts, (gsymbol, 'SELL', gamount, p, ex), ) #
+                        pools.apply_async(puts, (gsymbol, 'SELL', gamount, p, ex), )
+
+                        cbuy = df.loc[(df['internal_status'] == 0) & (df['side'] == 'SELL')]
+                        cbuy.sort_values('price', inplace=True, ascending=False)
+                        oid = df.iloc[cbuy.index[0]]['order_id']
+                        print('mandé a cancelar en buy ', oid)
+                        pools.apply_async(cancelorder, (oid, gsymbol,  ex), )
+                        # task_cancelorder.delay(api_key, api_id, oid, symbol)
+
+                        puto = df.loc[(df['internal_status'] == 0) & (df['side'] == 'BUY')]
+                        puto.sort_values('price', inplace=True, ascending=True)
+                        price = float(df.iloc[puto.index[0]]['price']) - threshold
+                        pools.apply_async(puts, (gsymbol, 'BUY', gamount, price, ex), )
 
                     if side == 'SELL' and filled == 1:
                         p = float(price) - threshold
                         pools.apply_async(puts, (gsymbol, 'BUY', gamount, p, ex), )
 
+                        csell = df.loc[(df['internal_status'] == 0) & (df['side'] == 'BUY')]
+                        csell.sort_values('price', inplace=True, ascending=True)
+                        oid = df.iloc[csell.index[0]]['order_id']
+                        print('mandé a cancelar en sell ', oid)
+                        pools.apply_async(cancelorder, (oid, gsymbol, ex), )
+                        # task_cancelorder.delay(api_key, api_id, oid, symbol)
 
+                        puto = df.loc[(df['internal_status'] == 0) & (df['side'] == 'SELL')]
+                        puto.sort_values('price', inplace=True, ascending=False)
+                        price = float(df.iloc[puto.index[0]]['price']) + threshold
+                        pools.apply_async(puts, (gsymbol, 'SELL', gamount, price, ex), )
+
+                        # task_puto.delay(api_key, api_id, symbol, 'LIMIT', 'SELL', amount, price, e)
 
                     filled = 1
 
-            if currentExecutionType == 'CANCEL':
-                pass
+            if currentExecutionType == 'CANCELED':
+                if orderType != 'MARKET':
+                    r = df.loc[df['order_id'] == orderId]
+                    if r.__len__() > 0:
+                        print('NO order for cancell ')
+                    else:
+                        now = datetime.now()
+                        now = now.strftime("%H:%M:%S")
+                        print('-------------------')
+                        print('[' + now + ']' + 'cancelling order...')
+                        print('Order id: ', orderId)
+                        print('-------------------')
+                    try:
+                        # df.at[r.index[0], 'grid_id'] = grid_id
 
-            self.orderTable.setModel(pandasModel(df))
+                        df.at[r.index[0], 'L'] = lastExecutedPrice
+                        # df.at[r.index[0], 'n'] = commissionAmount
+                        df.at[r.index[0], 's'] = symbol
+                        # df.at[r.index[0], 'N'] = commisionAsset
+                        # df.at[r.index[0], 'l'] = lastExecutedQuantity
+                        # df.at[r.index[0], 'z'] = cumulativeFilledQuantity
+                        df.at[r.index[0], 'cET'] = currentExecutionType
+                        df.at[r.index[0], 'cOS'] = currentOrderStatus
+                        df.at[r.index[0], 'internal_status'] = 5
+                        df.at[r.index[0], 'timestamp'] = timestamp
+                        df.at[r.index[0], 'order_id'] = orderId
+                        df.at[r.index[0], 'price'] = float(price)
+
+                    except Exception as e:
+                        print("peo '{}' ".format(e))
+
+
+
+            pools.apply_async(self.orderTable.setModel(pandasModel(df)) )
+
 
 
         except Exception as e:

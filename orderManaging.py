@@ -21,19 +21,23 @@ class ExchangeOrderManaging:
         pass
 
 
-def cancelorder(self, id, symbol, exchange):
-    x = exchange.cancel_order(id, symbol)
+def cancelorder(oids, symbol, exchange):
+    print('entrando encancell')
+    x = exchange.cancel_order(oids, symbol)
     print(x)
+    return
 
     # def cancelallorders(self, exchange):
     #     pass
 
-    def closetrade(self, exchange):
-        pass
+
+def closetrade(self, exchange):
+    pass
 
 
 def callo( ex, symbol):
-     x = ex.cancel_all_orders('BTC/USDT')
+     x = ex.cancel_all_orders(symbol)
+     return
      # print('afefw -->',  x)
 
 
@@ -91,6 +95,8 @@ def h(data, exchange):
         sell = (steps * 2) - buy - 1
         pool.apply_async(put, (sell, symbol, grid[sell][2], amount, grid[sell][1], exchange), )  # Evaluate "f(10)" asynchronously calling callback when finished.
         pool.apply_async(put, (buy,  symbol, grid[buy][2],  amount, grid[buy][1],  exchange), )  # Evaluate "f(10)" asynchronously calling callback when finished.
+    return
+
 
 def hftinit(data, exchange):
 
@@ -153,6 +159,8 @@ def hftinit(data, exchange):
         time.sleep(0.1)
         thread = threading.Thread(target=put, args=(buy, symbol, grid[buy][2], amount, grid[buy][1], exchange))
         thread.start()
+    return
+
 
 def put(n_, symbol_, dir_, amount_, price_, exchange_):
     e = exchange_.create_order(symbol_, 'LIMIT', dir_, amount_, price_)

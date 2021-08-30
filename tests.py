@@ -1,4 +1,5 @@
 import asyncio
+import sys
 from asyncio import get_event_loop
 import threading
 import time
@@ -23,29 +24,35 @@ exchange = ccxtpro.binance(
             'defaultType': 'future',
         },
     })
-exchange.set_sandbox_mode(True)
-
+# exchange.set_sandbox_mode(True)
 
 
 async def main(loop):
-    print('ewfawefaweawecwce',  exchange.milliseconds())
     await exchange.load_markets()
-    while True:
-        time.sleep(3.5)
-        pos = await exchange.fapiPrivate_get_positionrisk()  # or fapiPrivate_get_positionrisk()
-        posval = 0
-        market = exchange.market(grids[0][12])['id']
-        print(market)
-        await exchange.close()
-        for i in pos:
-            if (i['symbol'] == market):
-                print(i)
-                posval = float(i['positionAmt'])
-        if posval != 0:
-            filled = 1
-        else:
-            filled = 0
-        inicio_sell = 0
+
+    margen = await exchange.add_margin(grids[0][12], 5)
+    time.sleep(10)
+    exchange.marg
+    margen = await exchange.reduce_margin(grids[0][12], 5)
+    exchange.close()
+    print(margen)
+
+    # while True:
+    #     time.sleep(3.5)
+    #     pos = await exchange.fapiPrivate_get_positionrisk()  # or fapiPrivate_get_positionrisk()
+    #     posval = 0
+    #     market = exchange.market(grids[0][12])['id']
+    #     print(market)
+    #     await exchange.close()
+    #     for i in pos:
+    #         if (i['symbol'] == market):
+    #             print(i)
+    #             posval = float(i['positionAmt'])
+    #     if posval != 0:
+    #         filled = 1
+    #     else:
+    #         filled = 0
+    #     inicio_sell = 0
 
 #     while True:
 #         try:

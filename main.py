@@ -21,7 +21,8 @@ from orderManaging import hftinit, h
 from sockets import wbalance, fetchBalance, loadm
 from wsorders import worders
 from sockets import global_ticker
-from utils import message_status
+from utils import message_status, pandasModel
+
 ui, _ = loadUiType('main2.ui')
 
 exchange = None
@@ -38,6 +39,8 @@ steps = None
 api_key = None
 api_id = None
 order_data = None
+
+testnet = False
 
 disconnect = 0
 
@@ -69,6 +72,7 @@ class MainApp(QtWidgets.QMainWindow, ui):
         global order_data
         QtWidgets.QMainWindow.__init__(self)
         self.setupUi(self)
+        self.model = pandasModel(None)
         self.exchange = exchange
         # asyncio.ensure_future(self.startsockets())
         # asyncio.ensure_future()
@@ -85,18 +89,27 @@ class MainApp(QtWidgets.QMainWindow, ui):
         self.cancellallordersButton.clicked.connect(self.callo)
         self.hftrestartButton.clicked.connect(self.reiniti)
         self.closetradeButton.clicked.connect(self.remove)
-
+        self.testnetCheck.stateChanged.connect(self.enabletestnet)
         self.disconnectButton.clicked.connect(self.discon)
 
+    def enabletestnet(self):
+        if self.testnetCheck.isChecked():
+            testnet = True
+        else:
+            testnet = False
+
+
     def remove(self):
-        indexes =[QPersistentModelIndex(index) for index in self.orderTable.selectionModel()]
-        print(indexes)
-        maxrow = max(indexes, key=lambda x: x.row()).row()
-        next_ix = QPersistentModelIndex(self.QSModel.index(maxrow+1, 0))
-        for index in indexes:
-            print('Deleting row %d...' % index.row())
-            self.QSModel.removeRow(index.row())
-        self.orderTable.setCurrentIndex(QModelIndex(next_ix))
+        indexes = self.orderTable.selectedIndexes()
+        if indexes:
+            # Indexes is a list of a single item in single-select mode.
+            index = indexes[0]
+            # Remove the item and refresh.
+            del self.model._data[index.row()]
+            self.model.layoutChanged.emit()
+            # Clear the selection (as it is no longer valid).
+            self.orderTable.clearSelection()
+            self.save()
 
 
     def callo(self,):
@@ -139,9 +152,9 @@ class MainApp(QtWidgets.QMainWindow, ui):
     async def startsockets(self, ):
         await asyncio.gather(
             loadm(self, ex, exchange),
-            fetchBalance(self, exchange),
             wticker(self),
             wbalance(self, exchange),
+            fetchBalance(self, exchange),
             worders(self, exchange, amount, threshold, symbol, factor, ex)
         )
 
@@ -178,6 +191,8 @@ if __name__ == "__main__":
     steps = grids[0][6]
     factor = grids[0][5]
 
+
+
     exchange = ccxtpro.binance(
         {
             'asyncio_loop': loop,
@@ -189,7 +204,10 @@ if __name__ == "__main__":
                 'defaultType': 'future',
             },
         })
-    exchange.set_sandbox_mode(True)
+    if testnet:
+        exchange.set_sandbox_mode(True)
+    else:
+        exchange.set_sandbox_mode(False)
 
     ex = ccxt.binance(
         {
@@ -201,7 +219,11 @@ if __name__ == "__main__":
                 'defaultType': 'future',
             },
         })
-    ex.set_sandbox_mode(True)
+    if testnet:
+        ex.set_sandbox_mode(True)
+    else:
+        ex.set_sandbox_mode(False)
+
 
     asyncio.set_event_loop(loop)
     window = MainApp(exchange)
