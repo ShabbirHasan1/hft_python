@@ -1,10 +1,5 @@
-import asyncio
-
-import pandas as pd
-
-from utils import pandasModel, message_status
-from PyQt5.QtCore import Qt
-global_ticker = None
+import time
+from utils import message_status
 
 async def wticker(self, exchange):
     global global_ticker
@@ -23,7 +18,6 @@ async def wticker(self, exchange):
         finally:
             # print('t')
             pass
-
 
         # self.addTableRow(self.orderTable, row_1)
         # /¡self.logText.append('<span style="color:white">{}</span>'.format(str(self.ticker['last'])))
@@ -50,6 +44,7 @@ async def wohlc(self, exchange):
         # /¡self.logText.append('<span style="color:white">{}</span>'.format(str(self.ticker['last'])))
         # print_ticker()
 
+
 async def fetchBalance(self, exchange):
     try:
 
@@ -70,9 +65,6 @@ async def fetchBalance(self, exchange):
     # print(bal)
 
 
-
-
-
 async def loadm(self, ex, exchange):
     self.statusbar.showMessage("Fetching Markets...")
     ex.load_markets()
@@ -86,7 +78,7 @@ async def wbalance(self, exchange):
             self.statusbar.showMessage("Fetching WS Balance...")
             bal = await self.exchange.watchBalance()
             self.walletcapitalLCD.display(bal['USDT']['free'])
-            # print(bal)
+            print(bal['USDT'])
             # print(bal['info'])
         except Exception as e:
             print(e)
@@ -115,22 +107,6 @@ async def wbalance(self, exchange):
             # print('wb -e ')
 
 
-async def positionrisk(self, exchange, symbol, amount):
-    pos = await exchange.fapiPrivate_get_positionrisk()  # or fapiPrivate_get_positionrisk()
-    posval = 0
-    market = exchange.market(symbol)['id']
-    for i in pos:
-        if (i['symbol'] == market):
-            old_trades = float(i['positionAmt']) / amount
-            trades = int(old_trades)
-            print(i)
-            print('FOUND  TRADES ', trades)
-            posval = float(i['positionAmt'])
-    if posval != 0:
-        filled = 1
-    else:
-        filled = 0
-    return filled
 
 async def positionrisk(self, exchange, symbol):
     while True:
@@ -145,4 +121,25 @@ async def positionrisk(self, exchange, symbol):
         else:
             filled = 0
         return filled
-        time.sleep()
+
+def pplm(self, s, eo):
+    eo.loadMarkets()
+    print('entré en pplm')
+    try:
+        pos = eo.fapiPrivate_get_positionrisk()  # or fapiPrivate_get_positionrisk()
+        market = eo.market(s)['id']
+        for i in pos:
+            if (i['symbol'] == market):
+                print(i)
+                positionAmt = i['positionAmt']
+                entryPrice = i['entryPrice']
+                unRealizedProfit = i['unRealizedProfit']
+                liquidationPrice = i['liquidationPrice']
+                isolatedMargin = i['isolatedMargin']
+
+                # self.positionLCD.display(positionAmt)
+                # self.pnlLCD.display(unRealizedProfit)
+                # self.liquidationPriceLCD.display(liquidationPrice)
+                # self.marginLCD.display(isolatedMargin)
+    except Exception as e:
+        print(e)

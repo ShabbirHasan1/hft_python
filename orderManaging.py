@@ -10,6 +10,7 @@ from datetime import datetime
 import ccxt
 from multiprocessing import Pool
 
+
 class ExchangeOrderManaging:
     def __init__(self, exchange):
         pass
@@ -35,12 +36,10 @@ def closetrade(self, exchange):
     pass
 
 
-def callo( ex, symbol):
-     x = ex.cancel_all_orders(symbol)
-     return
-     # print('afefw -->',  x)
-
-
+def callo(ex, symbol):
+    x = ex.cancel_all_orders(symbol)
+    return
+    # print('afefw -->',  x)
 
 
 def h(data, exchange):
@@ -93,13 +92,14 @@ def h(data, exchange):
     for buy in range(steps):
         time.sleep(0.1)
         sell = (steps * 2) - buy - 1
-        pool.apply_async(put, (sell, symbol, grid[sell][2], amount, grid[sell][1], exchange), )  # Evaluate "f(10)" asynchronously calling callback when finished.
-        pool.apply_async(put, (buy,  symbol, grid[buy][2],  amount, grid[buy][1],  exchange), )  # Evaluate "f(10)" asynchronously calling callback when finished.
+        pool.apply_async(put, (sell, symbol, grid[sell][2], amount, grid[sell][1],
+                               exchange), )  # Evaluate "f(10)" asynchronously calling callback when finished.
+        pool.apply_async(put, (buy, symbol, grid[buy][2], amount, grid[buy][1],
+                               exchange), )  # Evaluate "f(10)" asynchronously calling callback when finished.
     return
 
 
 def hftinit(data, exchange):
-
     grid = []
     factor = int(data['factor'])
     threshold = data['threshold']
@@ -145,11 +145,9 @@ def hftinit(data, exchange):
         grid.append(temporal)
         low = low + threshold
 
-
     for buy in range(steps):
         time.sleep(0.2)
         sell = (steps * 2) - buy - 1
-
 
         # s = await exchange.create_order(symbol, 'LIMIT', grid[sell][2], amount, grid[sell][1])
         # b = await exchange.create_order(symbol, 'LIMIT', grid[buy][2], amount, grid[buy][1])
@@ -175,3 +173,9 @@ async def pu(n_, symbol_, dir_, amount_, price_, exchange_):
 def puts(symbol, dir, amount, price, exchange):
     e = exchange.create_order(symbol, 'LIMIT', dir, amount, price)
     return e
+
+
+async def addmargin(self, symbol, amount, exchange):
+    await exchange.add_margin(symbol, amount)
+
+

@@ -73,7 +73,7 @@
          <property name="geometry">
           <rect>
            <x>10</x>
-           <y>110</y>
+           <y>100</y>
            <width>1111</width>
            <height>81</height>
           </rect>
@@ -186,7 +186,7 @@
            <x>10</x>
            <y>410</y>
            <width>1111</width>
-           <height>261</height>
+           <height>251</height>
           </rect>
          </property>
          <property name="frameShape">
@@ -201,7 +201,7 @@
             <x>10</x>
             <y>10</y>
             <width>1091</width>
-            <height>241</height>
+            <height>231</height>
            </rect>
           </property>
           <property name="frameShape">
@@ -222,7 +222,7 @@
          <property name="geometry">
           <rect>
            <x>10</x>
-           <y>210</y>
+           <y>200</y>
            <width>1111</width>
            <height>81</height>
           </rect>
@@ -236,9 +236,9 @@
          <widget class="QLCDNumber" name="usedcapitalLcd">
           <property name="geometry">
            <rect>
-            <x>120</x>
+            <x>110</x>
             <y>10</y>
-            <width>209</width>
+            <width>181</width>
             <height>59</height>
            </rect>
           </property>
@@ -265,9 +265,9 @@
          <widget class="QProgressBar" name="usedcapitalBar">
           <property name="geometry">
            <rect>
-            <x>400</x>
+            <x>340</x>
             <y>20</y>
-            <width>691</width>
+            <width>391</width>
             <height>41</height>
            </rect>
           </property>
@@ -275,14 +275,45 @@
            <number>0</number>
           </property>
          </widget>
+         <widget class="QLabel" name="label_10">
+          <property name="geometry">
+           <rect>
+            <x>800</x>
+            <y>10</y>
+            <width>111</width>
+            <height>19</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>TRADE DIRECTION</string>
+          </property>
+         </widget>
+         <widget class="QLabel" name="directionLabel">
+          <property name="geometry">
+           <rect>
+            <x>970</x>
+            <y>30</y>
+            <width>81</width>
+            <height>21</height>
+           </rect>
+          </property>
+          <property name="font">
+           <font>
+            <pointsize>18</pointsize>
+           </font>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+         </widget>
         </widget>
         <widget class="QFrame" name="frame_5">
          <property name="geometry">
           <rect>
            <x>10</x>
-           <y>310</y>
+           <y>300</y>
            <width>1111</width>
-           <height>81</height>
+           <height>91</height>
           </rect>
          </property>
          <property name="frameShape">
@@ -291,13 +322,13 @@
          <property name="frameShadow">
           <enum>QFrame::Raised</enum>
          </property>
-         <widget class="QLCDNumber" name="lcdTicker_13">
+         <widget class="QLCDNumber" name="positionLCD">
           <property name="geometry">
            <rect>
-            <x>10</x>
-            <y>40</y>
-            <width>111</width>
-            <height>31</height>
+            <x>230</x>
+            <y>30</y>
+            <width>151</width>
+            <height>51</height>
            </rect>
           </property>
           <property name="frameShape">
@@ -310,36 +341,36 @@
          <widget class="QLabel" name="label_18">
           <property name="geometry">
            <rect>
-            <x>10</x>
+            <x>230</x>
             <y>10</y>
             <width>111</width>
             <height>19</height>
            </rect>
           </property>
           <property name="text">
-           <string>POSITION:</string>
+           <string>POSITION AMOUNT:</string>
           </property>
          </widget>
          <widget class="QLabel" name="label_19">
           <property name="geometry">
            <rect>
-            <x>140</x>
+            <x>460</x>
             <y>10</y>
             <width>111</width>
             <height>19</height>
            </rect>
           </property>
           <property name="text">
-           <string>PNL:</string>
+           <string>PROFIT:</string>
           </property>
          </widget>
-         <widget class="QLCDNumber" name="lcdTicker_14">
+         <widget class="QLCDNumber" name="pnlLCD">
           <property name="geometry">
            <rect>
-            <x>140</x>
-            <y>40</y>
-            <width>111</width>
-            <height>31</height>
+            <x>460</x>
+            <y>30</y>
+            <width>151</width>
+            <height>51</height>
            </rect>
           </property>
           <property name="frameShape">
@@ -352,7 +383,7 @@
          <widget class="QLabel" name="label_20">
           <property name="geometry">
            <rect>
-            <x>290</x>
+            <x>670</x>
             <y>10</y>
             <width>111</width>
             <height>19</height>
@@ -362,13 +393,13 @@
            <string>LIQUIDATION:</string>
           </property>
          </widget>
-         <widget class="QLCDNumber" name="lcdTicker_15">
+         <widget class="QLCDNumber" name="liquidationPriceLCD">
           <property name="geometry">
            <rect>
-            <x>290</x>
-            <y>40</y>
-            <width>111</width>
-            <height>31</height>
+            <x>670</x>
+            <y>30</y>
+            <width>151</width>
+            <height>51</height>
            </rect>
           </property>
           <property name="frameShape">
@@ -381,23 +412,23 @@
          <widget class="QLabel" name="label_21">
           <property name="geometry">
            <rect>
-            <x>450</x>
+            <x>890</x>
             <y>10</y>
             <width>111</width>
             <height>19</height>
            </rect>
           </property>
           <property name="text">
-           <string>POSITION:</string>
+           <string>MARGIN:</string>
           </property>
          </widget>
-         <widget class="QLCDNumber" name="lcdTicker_16">
+         <widget class="QLCDNumber" name="marginLCD">
           <property name="geometry">
            <rect>
-            <x>450</x>
-            <y>40</y>
-            <width>111</width>
-            <height>31</height>
+            <x>890</x>
+            <y>30</y>
+            <width>151</width>
+            <height>51</height>
            </rect>
           </property>
           <property name="frameShape">
@@ -405,6 +436,38 @@
           </property>
           <property name="digitCount">
            <number>8</number>
+          </property>
+         </widget>
+         <widget class="QLCDNumber" name="entryLCD">
+          <property name="geometry">
+           <rect>
+            <x>20</x>
+            <y>30</y>
+            <width>151</width>
+            <height>51</height>
+           </rect>
+          </property>
+          <property name="styleSheet">
+           <string notr="true">color: rgb(255, 255, 255);</string>
+          </property>
+          <property name="frameShape">
+           <enum>QFrame::NoFrame</enum>
+          </property>
+          <property name="digitCount">
+           <number>8</number>
+          </property>
+         </widget>
+         <widget class="QLabel" name="label_22">
+          <property name="geometry">
+           <rect>
+            <x>20</x>
+            <y>10</y>
+            <width>111</width>
+            <height>19</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>ENTRY PICE:</string>
           </property>
          </widget>
         </widget>
@@ -801,7 +864,7 @@ TO EXCHANGE</string>
            </widget>
            <widget class="QPushButton" name="disconnectButton">
             <property name="enabled">
-             <bool>false</bool>
+             <bool>true</bool>
             </property>
             <property name="geometry">
              <rect>
@@ -899,7 +962,7 @@ TO EXCHANGE</string>
            <property name="frameShadow">
             <enum>QFrame::Raised</enum>
            </property>
-           <widget class="QLineEdit" name="lineEdit_5">
+           <widget class="QLineEdit" name="addmarginText">
             <property name="geometry">
              <rect>
               <x>10</x>
@@ -923,7 +986,7 @@ TO EXCHANGE</string>
              <string/>
             </property>
            </widget>
-           <widget class="QLineEdit" name="lineEdit_6">
+           <widget class="QLineEdit" name="reducemarginText">
             <property name="geometry">
              <rect>
               <x>10</x>
@@ -944,7 +1007,7 @@ TO EXCHANGE</string>
              <set>Qt::AlignCenter</set>
             </property>
            </widget>
-           <widget class="QPushButton" name="pushButton_7">
+           <widget class="QPushButton" name="addmarginButton">
             <property name="geometry">
              <rect>
               <x>140</x>
@@ -957,7 +1020,7 @@ TO EXCHANGE</string>
              <string>ADD MARGIN</string>
             </property>
            </widget>
-           <widget class="QPushButton" name="pushButton_8">
+           <widget class="QPushButton" name="reducemarginButton">
             <property name="geometry">
              <rect>
               <x>140</x>

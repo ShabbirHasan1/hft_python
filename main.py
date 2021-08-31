@@ -8,19 +8,19 @@ AimarketsCap HFT SYSTEM GUI
 import asyncio
 import sys
 
-from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtCore import Qt, QPersistentModelIndex, QModelIndex
-from PyQt5.QtCore import pyqtSignal
+from PyQt5 import QtCore, QtWidgets
+from PyQt5.QtCore import QThreadPool
 from asyncqt import QEventLoop
 from PyQt5.uic import loadUiType
 import ccxt
 import ccxtpro
+from workers.exchangeWorkers import PositionRiskRunnable
+from workers.marginWorkers import MarginRunnable
 
 from readConf import readgrids
 from orderManaging import hftinit, h
 from sockets import wbalance, fetchBalance, loadm
 from wsorders import worders
-from sockets import global_ticker
 from utils import message_status, pandasModel
 
 ui, _ = loadUiType('main2.ui')
@@ -39,19 +39,15 @@ steps = None
 api_key = None
 api_id = None
 order_data = None
-
-testnet = False
-
+testnet = True
 disconnect = 0
-
-row_1 = ['<span style="color:green">313513513</span>', 'LIMIT', 'BUY', 'NEW', 'NEW', 46758.25, '1', 0.02]
+stopfapi = False
 
 async def wticker(self):
     global global_ticker
     self.statusbar.showMessage("Fetching PRICE...")
     while True:
         try:
-
             self.ticker = await self.exchange.watch_ticker(self.symbol)
             global_ticker = self.ticker['last']
             self.lcdTicker.display(self.ticker['last'])
@@ -66,14 +62,14 @@ async def wticker(self):
 
 
 class MainApp(QtWidgets.QMainWindow, ui):
-
-
     def __init__(self, exchange):
         global order_data
         QtWidgets.QMainWindow.__init__(self)
         self.setupUi(self)
         self.model = pandasModel(None)
         self.exchange = exchange
+        self.ex = ex
+        # self.pools = Pool(processes=12)
         # asyncio.ensure_future(self.startsockets())
         # asyncio.ensure_future()
         self.activehftLabel.setText(grids[0][1])
@@ -83,6 +79,7 @@ class MainApp(QtWidgets.QMainWindow, ui):
         self.marginLabel.setText(grids[0][8])
         self.symbolLabel.setText(grids[0][12])
         self.symbol = grids[0][12]
+
         # self.button1.clicked.connect(self.melo)
         self.connectButton.clicked.connect(self.unclick)
         self.hftinitButton.clicked.connect(self.initi)
@@ -92,12 +89,36 @@ class MainApp(QtWidgets.QMainWindow, ui):
         self.testnetCheck.stateChanged.connect(self.enabletestnet)
         self.disconnectButton.clicked.connect(self.discon)
 
+        self.addmarginButton.clicked.connect(self.add_margin)
+        self.reducemarginButton.clicked.connect(self.reduce_margin)
+
+        self.objects = self
+        self.pnl(symbol, ex)
+
+    def discon(self):
+        rin = PositionRiskRunnable(symbol, ex, self.objects, True)
+
+    def add_margin(self):
+        pool = QThreadPool.globalInstance()
+        runnable = MarginRunnable(symbol, self.ex, self.objects, 'add')
+        pool.start(runnable)
+
+    def reduce_margin(self):
+        pool = QThreadPool.globalInstance()
+        runnable = MarginRunnable(symbol, self.ex, self.objects, 'reduce')
+        pool.start(runnable)
+
+    def pnl(self, symbol, ex):
+        threadCount = QThreadPool.globalInstance().maxThreadCount()
+        pool = QThreadPool.globalInstance()
+        runnable = PositionRiskRunnable(symbol, ex, self.objects, stopfapi)
+        pool.start(runnable)
+
     def enabletestnet(self):
         if self.testnetCheck.isChecked():
             testnet = True
         else:
             testnet = False
-
 
     def remove(self):
         indexes = self.orderTable.selectedIndexes()
@@ -111,8 +132,7 @@ class MainApp(QtWidgets.QMainWindow, ui):
             self.orderTable.clearSelection()
             self.save()
 
-
-    def callo(self,):
+    def callo(self, ):
         x = ex.cancel_all_orders(self.symbol)
         # index_list = []
         # for model_index in self.tableView.selectionModel().selectedRows():
@@ -121,7 +141,6 @@ class MainApp(QtWidgets.QMainWindow, ui):
         #
         # for index in index_list:
         #     self.model.removeRow(index.row())
-
 
     def unclick(self):
         return asyncio.ensure_future(self.startsockets())
@@ -140,14 +159,9 @@ class MainApp(QtWidgets.QMainWindow, ui):
         self.callo()
         hftinit(order_data, ex)
 
-    def discon(self ):
-        return asyncio.ensure_future(self.xx())
-
     async def xx(self):
 
         await exchange.close()
-
-
 
     async def startsockets(self, ):
         await asyncio.gather(
@@ -155,7 +169,7 @@ class MainApp(QtWidgets.QMainWindow, ui):
             wticker(self),
             wbalance(self, exchange),
             fetchBalance(self, exchange),
-            worders(self, exchange, amount, threshold, symbol, factor, ex)
+            worders(self, exchange, amount, threshold, symbol, factor, ex),
         )
 
     # def addTableRow(self, table, row_data):
@@ -191,8 +205,6 @@ if __name__ == "__main__":
     steps = grids[0][6]
     factor = grids[0][5]
 
-
-
     exchange = ccxtpro.binance(
         {
             'asyncio_loop': loop,
@@ -223,7 +235,6 @@ if __name__ == "__main__":
         ex.set_sandbox_mode(True)
     else:
         ex.set_sandbox_mode(False)
-
 
     asyncio.set_event_loop(loop)
     window = MainApp(exchange)
