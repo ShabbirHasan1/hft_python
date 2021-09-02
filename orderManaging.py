@@ -23,10 +23,12 @@ class ExchangeOrderManaging:
 
 
 def cancelorder(oids, symbol, exchange):
-    print('entrando encancell')
-    x = exchange.cancel_order(oids, symbol)
-    print(x)
+    try:
+        x = exchange.cancel_order(oids, symbol)
+    except Exception as e:
+        print('exception in cancell order ', e)
     return
+
 
     # def cancelallorders(self, exchange):
     #     pass
@@ -36,7 +38,7 @@ def closetrade(self, exchange):
     pass
 
 
-def callo(ex, symbol):
+def callo(symbol, ex):
     x = ex.cancel_all_orders(symbol)
     return
     # print('afefw -->',  x)
@@ -88,14 +90,16 @@ def h(data, exchange):
         grid.append(temporal)
         low = low + threshold
 
-    pool = Pool(processes=4)
+    p = Pool(processes=4)
     for buy in range(steps):
         time.sleep(0.1)
         sell = (steps * 2) - buy - 1
-        pool.apply_async(put, (sell, symbol, grid[sell][2], amount, grid[sell][1],
+        p.apply_async(put, (sell, symbol, grid[sell][2], amount, grid[sell][1],
                                exchange), )  # Evaluate "f(10)" asynchronously calling callback when finished.
-        pool.apply_async(put, (buy, symbol, grid[buy][2], amount, grid[buy][1],
+        p.apply_async(put, (buy, symbol, grid[buy][2], amount, grid[buy][1],
                                exchange), )  # Evaluate "f(10)" asynchronously calling callback when finished.
+    p.close()
+
     return
 
 
@@ -146,7 +150,7 @@ def hftinit(data, exchange):
         low = low + threshold
 
     for buy in range(steps):
-        time.sleep(0.2)
+        time.sleep(0.1)
         sell = (steps * 2) - buy - 1
 
         # s = await exchange.create_order(symbol, 'LIMIT', grid[sell][2], amount, grid[sell][1])
@@ -161,8 +165,11 @@ def hftinit(data, exchange):
 
 
 def put(n_, symbol_, dir_, amount_, price_, exchange_):
-    e = exchange_.create_order(symbol_, 'LIMIT', dir_, amount_, price_)
-    return e
+    try:
+        e = exchange_.create_order(symbol_, 'LIMIT', dir_, amount_, price_)
+    except Exception as e:
+        print('exception in put order ', e)
+    return
 
 
 async def pu(n_, symbol_, dir_, amount_, price_, exchange_):
@@ -171,8 +178,12 @@ async def pu(n_, symbol_, dir_, amount_, price_, exchange_):
 
 
 def puts(symbol, dir, amount, price, exchange):
-    e = exchange.create_order(symbol, 'LIMIT', dir, amount, price)
-    return e
+    try:
+        e = exchange.create_order(symbol, 'LIMIT', dir, amount, price)
+    except Exception as e:
+        print('exception in putS order ', e)
+    return
+
 
 
 async def addmargin(self, symbol, amount, exchange):

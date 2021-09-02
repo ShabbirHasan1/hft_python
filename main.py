@@ -18,15 +18,15 @@ from workers.exchangeWorkers import PositionRiskRunnable
 from workers.marginWorkers import MarginRunnable
 
 from readConf import readgrids
-from orderManaging import hftinit, h
-from sockets import wbalance, fetchBalance, loadm
+from orderManaging import hftinit, h, callo
+from sockets import wbalance, fetchBalance, loadm, wticker
 from wsorders import worders
 from utils import message_status, pandasModel
+import sockets
 
 ui, _ = loadUiType('main2.ui')
 
 exchange = None
-global_ticker = None
 ex = None
 grids = None
 bal = None
@@ -42,24 +42,6 @@ order_data = None
 testnet = True
 disconnect = 0
 stopfapi = False
-
-async def wticker(self):
-    global global_ticker
-    self.statusbar.showMessage("Fetching PRICE...")
-    while True:
-        try:
-            self.ticker = await self.exchange.watch_ticker(self.symbol)
-            global_ticker = self.ticker['last']
-            self.lcdTicker.display(self.ticker['last'])
-            await message_status(self, "New PRICE event...", 0.3)
-        except Exception as e:
-            print(e)
-            self.statusbar.showMessage("ERROR: '{}' Fetching WS TICKER...".format(e))
-            break
-        finally:
-            # print('t')
-            pass
-
 
 class MainApp(QtWidgets.QMainWindow, ui):
     def __init__(self, exchange):
@@ -134,34 +116,23 @@ class MainApp(QtWidgets.QMainWindow, ui):
 
     def callo(self, ):
         x = ex.cancel_all_orders(self.symbol)
-        # index_list = []
-        # for model_index in self.tableView.selectionModel().selectedRows():
-        #     index = QtCore.QPersistentModelIndex(model_index)
-        #     index_list.append(index)
-        #
-        # for index in index_list:
-        #     self.model.removeRow(index.row())
 
     def unclick(self):
         return asyncio.ensure_future(self.startsockets())
 
     def initi(self):
         order_data = {'factor': grids[0][5], 'threshold': grids[0][4], 'symbol': grids[0][12],
-                      'steps': grids[0][6], 'amount': grids[0][3], 'ticker': global_ticker,
+                      'steps': grids[0][6], 'amount': grids[0][3], 'ticker': sockets.price_ticker,
                       'center': None}
 
         h(order_data, ex)
 
     def reiniti(self):
         order_data = {'factor': grids[0][5], 'threshold': grids[0][4], 'symbol': grids[0][12],
-                      'steps': grids[0][6], 'amount': grids[0][3], 'ticker': global_ticker,
-                      'center': global_ticker}
+                      'steps': grids[0][6], 'amount': grids[0][3], 'ticker': sockets.price_ticker,
+                      'center': sockets.price_ticker}
         self.callo()
         hftinit(order_data, ex)
-
-    async def xx(self):
-
-        await exchange.close()
 
     async def startsockets(self, ):
         await asyncio.gather(
@@ -169,25 +140,9 @@ class MainApp(QtWidgets.QMainWindow, ui):
             wticker(self),
             wbalance(self, exchange),
             fetchBalance(self, exchange),
-            worders(self, exchange, amount, threshold, symbol, factor, ex),
+            worders(self, exchange, amount, threshold, symbol, factor, ex, int(steps)
+                    ),
         )
-
-    # def addTableRow(self, table, row_data):
-    #     row = table.rowCount()
-    #     table.setRowCount(row + 1)
-    #     col = 0
-    #     for item in row_data:
-    #         print(item)
-    #         cell = QtWidgets.QTableWidgetItem(str(item))
-    #         table.setItem(row, col, cell)
-    #         col += 1
-
-    #
-    #     def melo(self):
-    #         # print(self.orderTable)
-    #         self.addTableRow(self.orderTable, row_1)
-    #
-
 
 if __name__ == "__main__":
     grids = readgrids()

@@ -1,14 +1,17 @@
 import time
 from utils import message_status
 
-async def wticker(self, exchange):
-    global global_ticker
+price_ticker = None
+balance = None
+
+
+async def wticker(self):
     self.statusbar.showMessage("Fetching PRICE...")
     while True:
         try:
-
+            global price_ticker
             self.ticker = await self.exchange.watch_ticker(self.symbol)
-            global_ticker = self.ticker['last']
+            price_ticker = self.ticker['last']
             self.lcdTicker.display(self.ticker['last'])
             await message_status(self, "New PRICE event...", 0.3)
         except Exception as e:
@@ -73,13 +76,24 @@ async def loadm(self, ex, exchange):
 
 async def wbalance(self, exchange):
     while True:
-        global bal
+        global balance
         try:
             self.statusbar.showMessage("Fetching WS Balance...")
             bal = await self.exchange.watchBalance()
             self.walletcapitalLCD.display(bal['USDT']['free'])
-            print(bal['USDT'])
-            # print(bal['info'])
+            # x = {'info': {'e': 'ACCOUNT_UPDATE', 'T': 1630546431781, 'E': 1630546431784,
+            #           'a': {'B': [{'a': 'USDT', 'wb': '9996.63709378', 'cw': '9947.27881141', 'bc': '0'}], 'P': [
+            #               {'s': 'BTCUSDT', 'pa': '-0.005', 'ep': '49335.39000', 'cr': '4.61880003', 'up': '-0.01987353',
+            #                'mt': 'isolated', 'iw': '49.35828237', 'ps': 'BOTH', 'ma': 'USDT'}], 'm': 'ORDER'}},
+            #  'USDT': {'free': None, 'used': None, 'total': 9996.63709378}, 'timestamp': None, 'datetime': None,
+            #  'free': {'USDT': None}, 'used': {'USDT': None}, 'total': {'USDT': 9996.63709378}}
+            print( bal['info']['a'])
+            try:
+                balance = bal['info']['a']['P'][0]['pa']
+                print(bal['info']['a']['P'][0]['pa'])
+            except Exception as e:
+                print('problem in balance socket ', e)
+
         except Exception as e:
             print(e)
             self.statusbar.showMessage("ERROR {} Fetching WS BALANCE...".format(e))
@@ -92,6 +106,7 @@ async def wbalance(self, exchange):
         # # start color code
         # print(bal)
         try:
+            # print(bal['info'])
             wb = float(bal['info']['a']['B'][0]['wb'])  # wallet balance
             cw = float(bal['info']['a']['B'][0]['cw'])  # free
             used = round((wb - cw), 3)
@@ -107,7 +122,6 @@ async def wbalance(self, exchange):
             # print('wb -e ')
 
 
-
 async def positionrisk(self, exchange, symbol):
     while True:
         pos = await exchange.fapiPrivate_get_positionrisk()  # or fapiPrivate_get_positionrisk()
@@ -121,6 +135,7 @@ async def positionrisk(self, exchange, symbol):
         else:
             filled = 0
         return filled
+
 
 def pplm(self, s, eo):
     eo.loadMarkets()
