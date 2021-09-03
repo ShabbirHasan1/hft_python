@@ -50,14 +50,12 @@ async def wohlc(self, exchange):
 
 async def fetchBalance(self, exchange):
     try:
-
-        global bal
-        bal = await self.exchange.fetchBalance()
+        b = await self.exchange.fetchBalance()
         self.statusbar.showMessage("Fetching Balance...")
-        self.walletcapitalLCD.display(bal['USDT']['free'])
-        self.usedcapitalLcd.display(bal['USDT']['used'])
-        # used = round((bal['USDT']['free'] - bal['USDT']['used']), 3)
-        r = (bal['USDT']['used'] * 100 / bal['USDT']['total'])
+        self.walletcapitalLCD.display(b['USDT']['free'])
+        self.usedcapitalLcd.display(b['USDT']['used'])
+        # used = round((b['USDT']['free'] - b['USDT']['used']), 3)
+        r = (b['USDT']['used'] * 100 / b['USDT']['total'])
         # print(r)
         self.usedcapitalBar.setValue(int(r))
     except Exception as e:
@@ -87,10 +85,10 @@ async def wbalance(self, exchange):
             #                'mt': 'isolated', 'iw': '49.35828237', 'ps': 'BOTH', 'ma': 'USDT'}], 'm': 'ORDER'}},
             #  'USDT': {'free': None, 'used': None, 'total': 9996.63709378}, 'timestamp': None, 'datetime': None,
             #  'free': {'USDT': None}, 'used': {'USDT': None}, 'total': {'USDT': 9996.63709378}}
-            print( bal['info']['a'])
+            # print( bal['info']['a'])
             try:
                 balance = bal['info']['a']['P'][0]['pa']
-                print(bal['info']['a']['P'][0]['pa'])
+                print('BALANCE EW WATCHBALANCE: ', bal['info']['a']['P'][0]['pa'])
             except Exception as e:
                 print('problem in balance socket ', e)
 
@@ -123,18 +121,17 @@ async def wbalance(self, exchange):
 
 
 async def positionrisk(self, exchange, symbol):
-    while True:
-        pos = await exchange.fapiPrivate_get_positionrisk()  # or fapiPrivate_get_positionrisk()
-        posval = 0
-        market = exchange.market(symbol)['id']
-        for i in pos:
-            if (i['symbol'] == market):
-                posval = float(i['positionAmt'])
-        if posval != 0:
-            filled = 1
-        else:
-            filled = 0
-        return filled
+    pos = await exchange.fapiPrivate_get_positionrisk()  # or fapiPrivate_get_positionrisk()
+    posval = 0
+    market = exchange.market(symbol)['id']
+    for i in pos:
+        if (i['symbol'] == market):
+            posval = float(i['positionAmt'])
+    if posval != 0:
+        filled = 1
+    else:
+        filled = 0
+    return filled
 
 
 def pplm(self, s, eo):

@@ -18,7 +18,7 @@ class PositionRiskRunnable(QRunnable):
         self.exchange.loadMarkets()
         self.obj.liquidationPriceLCD.setStyleSheet("color: yellow;")
         while True:
-            sleep(random.uniform(2.2, 4.3))
+            sleep(random.uniform(1.5, 3.3))
             try:
                 pos = self.exchange.fapiPrivate_get_positionrisk()  # or fapiPrivate_get_positionrisk()
                 market = self.exchange.market(self.symbol)['id']
@@ -27,9 +27,10 @@ class PositionRiskRunnable(QRunnable):
                         # print(i)
                         positionAmt = float(i['positionAmt'])
                         entryPrice = float(i['entryPrice'])
-                        unRealizedProfit = round(float(i['unRealizedProfit']), 3)
+                        unRealizedProfit = round(float(i['unRealizedProfit']), 2)
                         liquidationPrice = float(i['liquidationPrice'])
-                        isolatedMargin = round(float(i['isolatedMargin']), 3)
+                        isolatedMargin = round(float(i['isolatedMargin']), 2)
+                        isolatedWallet = round(float(i['isolatedWallet']), 2)
 
                         if unRealizedProfit < 0:
                             # foreground colo
@@ -56,7 +57,11 @@ class PositionRiskRunnable(QRunnable):
                         self.obj.pnlLCD.display(unRealizedProfit)
                         self.obj.marginLCD.display(isolatedMargin)
 
+                        self.obj.isolatedwalletLCD.display(isolatedWallet)
+                        t = isolatedMargin + isolatedWallet
+                        self.obj.totalLCD.display(t)
+
 
             except Exception as e:
-                print(e)
+                print('ERROR EN RUNABLE DE FAPIPOSITIONr ', e)
         return

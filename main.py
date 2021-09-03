@@ -16,6 +16,7 @@ import ccxt
 import ccxtpro
 from workers.exchangeWorkers import PositionRiskRunnable
 from workers.marginWorkers import MarginRunnable
+from workers.orepeatsWorker import OrepeatsRunnable
 
 from readConf import readgrids
 from orderManaging import hftinit, h, callo
@@ -76,9 +77,15 @@ class MainApp(QtWidgets.QMainWindow, ui):
 
         self.objects = self
         self.pnl(symbol, ex)
+        self.duplicates()
 
     def discon(self):
         rin = PositionRiskRunnable(symbol, ex, self.objects, True)
+
+    def duplicates(self):
+        pool = QThreadPool.globalInstance()
+        runnable = OrepeatsRunnable(self.symbol, self.objects, self.ex)
+        pool.start(runnable)
 
     def add_margin(self):
         pool = QThreadPool.globalInstance()
@@ -89,6 +96,8 @@ class MainApp(QtWidgets.QMainWindow, ui):
         pool = QThreadPool.globalInstance()
         runnable = MarginRunnable(symbol, self.ex, self.objects, 'reduce')
         pool.start(runnable)
+
+
 
     def pnl(self, symbol, ex):
         threadCount = QThreadPool.globalInstance().maxThreadCount()

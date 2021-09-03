@@ -9,23 +9,21 @@ from multiprocessing import Pool
 import sockets
 
 grilla = []
-
 trades = 0
-
+cancel = 0
+balance = 0
 async def worders(self, exchange, gamount, threshold, gsymbol, factor, ex, steps):
     global grilla
     global trades
-
-
+    global cancel
+    global balance
     pools = Pool(processes=8)
     filled = 0
     saldo = None
-    balance = sockets.balance
+
 
     i = 0
     n = 0
-
-    cancel = 0
     enter = 0
 
     position_amount = 0
@@ -37,6 +35,7 @@ async def worders(self, exchange, gamount, threshold, gsymbol, factor, ex, steps
     await exchange.load_markets()
     ex.load_markets()
     filled = await positionrisk(self, exchange, gsymbol)
+    balance = sockets.balance
     while True:
         try:
             orders = await exchange.watchOrders()
@@ -53,9 +52,11 @@ async def worders(self, exchange, gamount, threshold, gsymbol, factor, ex, steps
             amount = orders[0]['info']['q']
             side = orders[0]['info']['S']
             price = float(orders[0]['info']['p'])
-            lastExecutedPrice = float(orders[0]['info']['L'])
-            timestamp = int(orders[0]['info']['T'])
-            symbol = orders[0]['info']['s']
+            # lastExecutedPrice = float(orders[0]['info']['L'])
+            # timestamp = int(orders[0]['info']['T'])
+            # symbol = orders[0]['info']['s']
+
+
 
             if (currentExecutionType == 'NEW') and (currentOrderStatus == 'NEW'):
                 if type != 'MARKET':
@@ -74,6 +75,16 @@ async def worders(self, exchange, gamount, threshold, gsymbol, factor, ex, steps
 
             if currentExecutionType == 'TRADE' and currentOrderStatus == 'FILLED':
                 if type != 'MARKET':
+
+                    if balance == 0:
+                        print('balance es cero en SELL')
+
+                        cancel = 1
+                        filled = 0
+                        trades = 0
+                        ex.cancel_all_orders(gsymbol)
+                        grilla.clear()
+
                     #                     commission_amount = json_reply['o']['n']
                     #                     commision_asset = json_reply['o']['N']
                     #                     last_executed_quantity = json_reply['o']['l']
@@ -117,45 +128,27 @@ async def worders(self, exchange, gamount, threshold, gsymbol, factor, ex, steps
                         grilla.pop(match-1)
                         grilla = sorting_list(grilla)
 
-                        if balance == 0:
-                            cancel = 1
-                            filled = 0
-                            trades = 0
-                            # esto ha de ser asi si voy a detener la grilla cuando cierre
-                            ex.cancel_all_orders(symbol)
-                            grilla.clear()
-                        else:
-                            cancel = 0
-                            sell_value = float(price) + threshold
-                            buy_value = grilla[0][2] - threshold
-                            grilla.pop(-1)
-                            grilla = sorting_list(grilla)
-                            pools.apply_async(puts, (gsymbol, 'SELL', gamount, sell_value, ex), )
-                            pools.apply_async(puts, (gsymbol, 'BUY', gamount, buy_value, ex), )
-                            pools.apply_async(cancelorder, (order_to_cancel, gsymbol, ex), )
+                        cancel = 0
+                        sell_value = float(price) + threshold
+                        buy_value = grilla[0][2] - threshold
+                        grilla.pop(-1)
+                        grilla = sorting_list(grilla)
+                        pools.apply_async(puts, (gsymbol, 'SELL', gamount, sell_value, ex), )
+                        # pools.apply_async(puts, (gsymbol, 'BUY', gamount, buy_value, ex), )
+                       # pools.apply_async(cancelorder, (order_to_cancel, gsymbol, ex), )
 
                     if side == 'SELL' and filled == 1:
                         order_to_cancel = grilla[0][1]
                         grilla.pop(match - 1)
                         grilla = sorting_list(grilla)
-
-                        if balance == 0:
-                            cancel = 1
-                            filled = 0
-                            trades = 0
-                            # esto ha de ser asi si voy a detener la grilla cuando cierre
-                            ex.cancel_all_orders(symbol)
-                            grilla.clear()
-
-                        else:
-                            cancel = 0
-                            buy_value = float(price) - threshold
-                            sell_value = grilla[-1][2] + threshold
-                            grilla.pop(0)
-                            grilla = sorting_list(grilla)
-                            pools.apply_async(puts, (gsymbol, 'BUY', gamount, buy_value, ex), )
-                            pools.apply_async(puts, (gsymbol, 'SELL', gamount, sell_value, ex), )
-                            pools.apply_async(cancelorder, (order_to_cancel, gsymbol, ex), )
+                        cancel = 0
+                        buy_value = float(price) - threshold
+                        sell_value = grilla[-1][2] + threshold
+                        grilla.pop(0)
+                        grilla = sorting_list(grilla)
+                        pools.apply_async(puts, (gsymbol, 'BUY', gamount, buy_value, ex), )
+                        # pools.apply_async(puts, (gsymbol, 'SELL', gamount, sell_value, ex), )
+                       # pools.apply_async(cancelorder, (order_to_cancel, gsymbol, ex), )
 
                     filled = 1
 
@@ -176,7 +169,6 @@ async def worders(self, exchange, gamount, threshold, gsymbol, factor, ex, steps
                             trades = 0
 
 
-
                     if (match == 0):
                         print('[' + ('{:.4f}'.format(now)) + ']' + '    CANCELLED: ORDER ID: ' + str(
                             orderId) + ' PRICE: ' + ('{:.4f}'.format(price)) + ' SIDE: ' + side)
@@ -186,6 +178,8 @@ async def worders(self, exchange, gamount, threshold, gsymbol, factor, ex, steps
 
                         grilla = sorting_list(grilla)
 
+            print(grilla)
+            print(type(grilla))
 
         except Exception as e:
             #print(e)
