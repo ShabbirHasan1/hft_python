@@ -1,211 +1,314 @@
-import operator
-import time
+import json
+import threading
 from datetime import datetime
+
 from sockets import positionrisk
 import pandas as pd
 from utils import pandasModel, message_status
-from orderManaging import puts, cancelorder
-from multiprocessing import Pool
+from orderManaging import puts, cancelorder, put_first_order
+import orderManaging
 import sockets
+import gvars
 
-grilla = []
-trades = 0
-cancel = 0
-balance = 0
-async def worders(self, exchange, gamount, threshold, gsymbol, factor, ex, steps):
-    global grilla
-    global trades
-    global cancel
-    global balance
-    pools = Pool(processes=8)
-    filled = 0
-    saldo = None
+cancel_global = 0
 
 
-    i = 0
-    n = 0
-    enter = 0
-
-    position_amount = 0
-    inicio_sell = 0
-    inicio_buy = 0
-
-    arr = {}
+async def worders(self):
+    gamount = gvars.amount
+    gsymbol = gvars.symbol
+    threshold = gvars.threshold
+    ex = gvars.ex
+    exchange = gvars.exchange
 
     await exchange.load_markets()
     ex.load_markets()
     filled = await positionrisk(self, exchange, gsymbol)
-    balance = sockets.balance
+    market = exchange.market(gsymbol)['id']
+    df = pd.DataFrame(
+        columns=['internal_status', 's', 'x', 'X', 'p', 'o', 'S', 'i', 'T', 'L', 'n', 'N', 'l', 'z'])
+    cancel = 0
+
     while True:
+        if gvars.disconnect == 1:
+            await exchange.close()
+            print('disconnect from wsorders')
+            break
         try:
-            orders = await exchange.watchOrders()
+            jsonx = await exchange.watchOrders()
 
-            # print('price ticker ', sockets.price_ticker)
-            # print('balance ', sockets.balance)
+            currentExecutionType = jsonx[0]['info']['x']
+            currentOrderStatus = jsonx[0]['info']['X']
+            orderType = jsonx[0]['info']['o']
+            orderId = int(jsonx[0]['info']['i'])
+            side = jsonx[0]['info']['S']
+            price = float(jsonx[0]['info']['p'])
+            # lastExecutedPrice = float(jsonx[0]['info']['L'])
+            timestamp = int(jsonx[0]['info']['T'])
 
-            # self.statusbar.showMessage("Fetching WS ORDERS...")
-
-            currentExecutionType = orders[0]['info']['x']
-            currentOrderStatus = orders[0]['info']['X']
-            orderType = orders[0]['info']['o']
-            orderId = int(orders[0]['info']['i'])
-            amount = orders[0]['info']['q']
-            side = orders[0]['info']['S']
-            price = float(orders[0]['info']['p'])
-            # lastExecutedPrice = float(orders[0]['info']['L'])
-            # timestamp = int(orders[0]['info']['T'])
-            # symbol = orders[0]['info']['s']
-
-
-
-            if (currentExecutionType == 'NEW') and (currentOrderStatus == 'NEW'):
+            if currentExecutionType == 'NEW' and currentOrderStatus == 'NEW':
                 if type != 'MARKET':
                     cancel = 0
-                    now = datetime.now()
-                    now = now.timestamp()
-                    print('[' + ('{:.4f}'.format(now)) + ']' + '    NEW ORDER: ORDER ID: ' + str(
-                        orderId) + ' PRICE: ' + (
-                              '{:.4f}'.format(price)) + ' SIDE: ' + side)
-                    # Construcción de la grilla en una lista con todos los elementos que estan activos unicamente
-                    temporal = []
-                    temporal.extend([n, orderId, price, side])
-                    grilla.append(temporal)
-                    n = n + 1
-                    grilla = sorting_list(grilla)
+
+                    # print('New Order')
+                    # print('ORDER ID ', orderId)
+                    # print('PRICE : ', price)
+                    # print('SIDE : ', side)
+                    # print('-------------------')
+                    r = df.loc[df['i'] == orderId]
+                    if r.__len__() > 0:
+                        print('order found not for save...')
+                    else:
+                        df = df.append(
+                            {'grid_id': 0, 'internal_status': 0, 's': gsymbol, 'x': currentExecutionType,
+                             'X': currentOrderStatus, 'p': price,
+                             'o': orderType, 'S': side, 'i': orderId, 'T': timestamp, 'L': '', 'n': '', 'N': '',
+                             'l': '', 'z': ''}, ignore_index=True)
 
             if currentExecutionType == 'TRADE' and currentOrderStatus == 'FILLED':
                 if type != 'MARKET':
+                    # commissionAmount = jsonx['o']['n']
+                    # commisionAsset = jsonx['o']['N']
+                    # lastExecutedQuantity = jsonx['o']['l']
+                    # cumulativeFilledQuantity = jsonx['o']['z']
 
-                    if balance == 0:
-                        print('balance es cero en SELL')
-
-                        cancel = 1
-                        filled = 0
-                        trades = 0
-                        ex.cancel_all_orders(gsymbol)
-                        grilla.clear()
-
-                    #                     commission_amount = json_reply['o']['n']
-                    #                     commision_asset = json_reply['o']['N']
-                    #                     last_executed_quantity = json_reply['o']['l']
-                    #                     cumulative_filled_quantity = json_reply['o']['z']
-                    match = order_match(orderId)  # esto puede suprimirse por if sell and if buy
-                    side = grilla[match - 1][3]
-
-                    now = datetime.now()
-                    now = now.timestamp()
-                    trades = trades + 1
-
-                    print(
-                        '[' + ('{:.4f}'.format(now)) + ']' + ' ORDER FILLED: ORDER ID: ' + str(orderId) + ' PRICE: ' + (
-                            '{:.4f}'.format(price)) + ' SIDE: ' + side)
-                    if balance != None:
-                        print('[' + ('{:.4f}'.format(now)) + ']' + ' BALANCE: ' + str(abs(balance)) + ' TRADES: ' + str(
-                            trades) + " ON " + side)
+                    r = df.loc[df['i'] == orderId]
+                    # se revienta si el dataframe está vacío
+                    df.at[r.index[0], 'grid_id'] = 0
+                    df.at[r.index[0], 'L'] = float(jsonx[0]['info']['L'])
+                    # df.at[r.index[0], 'n'] = commissionAmount
+                    # df.at[r.index[0], 'N'] = commisionAsset
+                    # df.at[r.index[0], 'l'] = lastExecutedQuantity
+                    # df.at[r.index[0], 'z'] = cumulativeFilledQuantity
+                    df.at[r.index[0], 'x'] = currentExecutionType
+                    df.at[r.index[0], 'X'] = currentOrderStatus
+                    df.at[r.index[0], 'internal_status'] = 1
+                    df.at[r.index[0], 'T'] = timestamp
+                    df.at[r.index[0], 'i'] = orderId
+                    print('*  A UPDATED ', side, 'FROM NEW A FILLED ID:    *', orderId)
 
                     if side == 'BUY' and filled == 0:
-                        border = grilla[0][2]
-                        price = border - threshold
-                        grilla.pop(match - 1)
-                        grilla = sorting_list(grilla)
-                        print('[' + ('{:.4f}'.format(now)) + ']' + ' ENTRADA A LA GRILLA: ' + (
-                            '{:.4f}'.format(price)) + ' ON ' + side)
-                        pools.apply_async(puts, (gsymbol, side, amount, price, ex), )
+                        count = 0
+                        print('-------------------')
+                        print('BUY TRADE FILLED ON ZERO')
+                        buycero = df.loc[(df['internal_status'] == 0) & (df['S'] == 'BUY')]
+                        buycero.sort_values('p', inplace=True, ascending=True)
+                        price = float(df.iloc[buycero.index[0]]['p']) - threshold
+                        # print('MORE LOW BUY ORDER PRICE: ', df.iloc[buycero.index[0]]['p'])
+                        # print('MAKING BUY ORDER AT PRICE  ', price)
+                        t = threading.Thread(target=puts, args=(gsymbol, 'BUY', gamount, price))
+                        t.start()
+                        # task_puto.delay(api_key, api_id, symbol, 'LIMIT', 'BUY', amount, price, e)
+
+                        print('-------------------')
 
                     if side == 'SELL' and filled == 0:
-                        border = grilla[steps - 1][2]
-                        price = border + threshold
-                        grilla.pop(match - 1)
-                        grilla = sorting_list(grilla)
-                        print('[' + ('{:.4f}'.format(now)) + ']' + ' ENTRADA A LA GRILLA: ' + (
-                            '{:.4f}'.format(price)) + ' ON ' + side)
-                        pools.apply_async(puts, (gsymbol, side, gamount, price, ex), )
+                        count = 0
+                        print('-------------------')
+                        print('SELL TRADE FILLED ON ZERO')
+                        sellcero = df.loc[(df['internal_status'] == 0) & (df['S'] == 'SELL')]
+                        sellcero.sort_values('p', inplace=True, ascending=False)
+                        price = float(df.iloc[sellcero.index[0]]['p']) + threshold
+                        # print('MORE HIGH SELL ORDER PRICE: ', df.iloc[sellcero.index[0]]['p'])
+                        # print('MAKING SELL ORDER AT PRICE  ', price)
+                        t = threading.Thread(target=puts, args=(gsymbol, 'SELL', gamount, price))
+                        t.start()
+                        # task_puto.delay(api_key, api_id, symbol, 'LIMIT', 'SELL', amount, price, e)
+                        print('-------------------')
 
-                    # aqui termina la parte donde inicia la grilla desde cero y comienza la parte donde la grilla trabaja hasta el fin
+                        if side == 'BUY' and filled == 1:
+                            if type != 'MARKET':
 
-                    if side == 'BUY' and filled == 1:
-                        order_to_cancel = grilla[-1][1]
-                        grilla.pop(match-1)
-                        grilla = sorting_list(grilla)
+                                print('THERE HAS BEEN A BUY')
+                                print('ORDER ID:  ', orderId)
+                                print('BALANCE  ', sockets.balance)
+                                # print('TRADES  ', trades)
+                                if sockets.balance == 0:
+                                    # trades = trades + 1
+                                    n = datetime.now()
+                                    # print(geen)
+                                    # done = str(n.strftime("%b - %d - %Y %H:%M:%S"))
+                                    # print("***********************************************************")
+                                    print("GRID FINISHED IN BUY ")
+                                    # print("GRID START IN {0} ".format(
+                                    #     str(grid_start_time)))
+                                    # print("GRID STOP IN  {0} ".format(done))
+                                    # print("TRADES = {0} ".format(trades))
+                                    # print("INITIAL BALANCE = {0} ".format(initial_balance))
+                                    # print("***********************************************************")
+                                    # print(res)
+                                    # # dataframe_end_time = str(n.strftime("%b_%d_%Y_%H_%M"))
+                                    # df = df[df['x'] != 'CANCELED']
+                                    # # task_dataframe_to_csv(df, str(dataframe_start_time), str(dataframe_end_time))
+                                    # task_cancelallorders(api_key, api_id, symbol)
+                                    # cancel = 1
+                                    # filled = 0
+                                    # trades = 0
+                                    # print(res)
+                                else:
+                                    cancel = 0
+                                    trades = trades + 1
+                                    p = float(price) + threshold
+                                    now = datetime.now()
 
-                        cancel = 0
-                        sell_value = float(price) + threshold
-                        buy_value = grilla[0][2] - threshold
-                        grilla.pop(-1)
-                        grilla = sorting_list(grilla)
-                        pools.apply_async(puts, (gsymbol, 'SELL', gamount, sell_value, ex), )
-                        # pools.apply_async(puts, (gsymbol, 'BUY', gamount, buy_value, ex), )
-                       # pools.apply_async(cancelorder, (order_to_cancel, gsymbol, ex), )
+                                    n = now.strftime("%H:%M:%S")
+                                    print('[' + n + '] MAKING SELL ORDER  ON CENTER:  ', float(p))
+                                    t = threading.Thread(target=puts, args=(gsymbol, 'SELL', gamount, float(p)))
+                                    t.start()
 
-                    if side == 'SELL' and filled == 1:
-                        order_to_cancel = grilla[0][1]
-                        grilla.pop(match - 1)
-                        grilla = sorting_list(grilla)
-                        cancel = 0
-                        buy_value = float(price) - threshold
-                        sell_value = grilla[-1][2] + threshold
-                        grilla.pop(0)
-                        grilla = sorting_list(grilla)
-                        pools.apply_async(puts, (gsymbol, 'BUY', gamount, buy_value, ex), )
-                        # pools.apply_async(puts, (gsymbol, 'SELL', gamount, sell_value, ex), )
-                       # pools.apply_async(cancelorder, (order_to_cancel, gsymbol, ex), )
+                                    # task_puto.delay(api_key, api_id, symbol, 'LIMIT', 'SELL', float(amount), float(p))
+                                    cbuy = df.loc[(df['internal_status'] == 0) & (df['S'] == 'SELL')]
+                                    cbuy.sort_values('p', inplace=True, ascending=False)
+                                    oid = df.iloc[cbuy.index[0]]['i']
+                                    print('[' + n + ']  CANCELING THE LAST SELL ORDER : ', oid)
 
-                    filled = 1
+                                    # e = 1
+                                    # task_cancelorder.delay(api_key, api_id, oid, symbol)
+                                    # e = 0
+                                    puto = df.loc[(df['internal_status'] == 0) & (df['S'] == 'BUY')]
+                                    puto.sort_values('p', inplace=True, ascending=True)
+                                    price = float(df.iloc[puto.index[0]]['p']) - threshold
 
-            if currentOrderStatus == 'CANCELED':
+                                    print('[' + n + ']' + 'PUT BUY ORDER AT BOTTOM  ', p)
+                                    t = threading.Thread(target=puts, args=(gsymbol, 'BUY', gamount, price))
+                                    t.start()
+                                    # task_puto.delay(api_key, api_id, symbol, 'LIMIT', 'BUY', amount, price, e)
+
+                                    # PONER UN SELL  (BUY + Tthreshold) y borrar el primer sell
+
+                        if side == 'SELL' and filled == 1:
+                            if type != 'MARKET':
+                                print('THERE AS BEEN A SELL ')
+                                print('ORDER ID:  ', orderId)
+                                print('BALANCE    ', sockets.balance)
+
+                                if sockets.balance == 0:
+                                    # trades = trades + 1
+                                    # n = datetime.now()
+                                    # done = str(n.strftime("%b - %d - %Y %H:%M:%S"))
+                                    print("***********************************************************")
+                                    print("GRID FINISHED IN SELL")
+                                    # print("GRID START IN {0}".format(str(grid_start_time)))
+                                    # print("GRID STOP IN  {0}".format(done))
+                                    # print("TRADES = {0}".format(trades))
+                                    # print("***********************************************************")
+                                    # print(res)
+                                    # dataframe_end_time = str(n.strftime("%b_%d_%Y_%H_%M"))
+                                    # df = df[df['x'] != 'CANCELED']
+                                    # # task_dataframe_to_csv(df, str(dataframe_start_time), str(dataframe_end_time))
+                                    # task_cancelallorders(api_key, api_id, symbol)
+                                    # cancel = 1
+                                    # filled = 0
+                                    # trades = 0
+
+                                else:
+                                    cancel = 0
+                                    trades = trades + 1
+                                    p = float(price) - threshold
+                                    now = datetime.now()
+                                    n = now.strftime("%H:%M:%S")
+                                    print('[' + n + ']' + ' MAKING BUY ORDER ON CENTER:  ', float(p))
+                                    t = threading.Thread(target=puts, args=(gsymbol, 'BUY', gamount, p))
+                                    t.start()
+                                    # task_puto.delay(api_key, api_id, symbol, 'LIMIT', 'BUY', amount, p)
+                                    csell = df.loc[(df['internal_status'] == 0) & (df['S'] == 'BUY')]
+                                    csell.sort_values('p', inplace=True, ascending=True)
+                                    # print(csell)
+                                    oid = df.iloc[csell.index[0]]['i']
+                                    print('[' + n + ']' + 'CANCEL BUY ORDER AT BOTTOM: ', oid)
+
+                                    # e = 1
+                                    # task_cancelorder.delay(api_key, api_id, oid, symbol)
+                                    # e = 0
+                                    puto = df.loc[(df['internal_status'] == 0) & (df['S'] == 'SELL')]
+                                    puto.sort_values('p', inplace=True, ascending=False)
+                                    price = float(df.iloc[puto.index[0]]['p']) + threshold
+                                    # exchange.create_order(symbol, 'LIMIT', 'SELL', amount, p)
+                                    n = now.strftime("%H:%M:%S")
+
+                                    print('[' + n + ']' + 'PUT SELL ORDER  AT TOP  ', p)
+
+                                    t = threading.Thread(target=puts, args=(gsymbol, 'SELL', gamount, price))
+                                    t.start()
+                                    # task_puto.delay(api_key, api_id, symbol, 'LIMIT', 'SELL', amount, price, e)
+
+                                    # PONER UN BUY  (SELL - Tthreshold) y borrar el ultimo buy
+
+                        filled = 1
+
+            if currentExecutionType == 'CANCELED':
+
                 if type != 'MARKET':
-                    match = order_match(orderId)
-
-                    # esta parte tengo que verificarla y todo eso
+                    # r = df.loc[df['i'] == order_id]
                     if cancel == 1:
-                        oo = exchange.fetch_open_orders(gsymbol)
-                        if oo.__len__() == 0:  # aqui verifio si todas las ordenes han sido canceladas
+                        pass
+                        # oo = exchange.fetch_open_orders(gsymbol)
+                        # if oo.__len__() == 0:
+                        #     df.drop(df.index, inplace=True)
+                        #     # final_balance = exchange.fetch_balance()
+                        #     # final_balance = final_balance['USDT']['free']
+                        #     # re = final_balance - initial_balance
+                        #     # print(geen + "***************************************")
+                        #     # print("INITIAL BALANCE = {0}".format(str(initial_balance)))
+                        #     # print("FINAL BALANCE = {0}".format(str(final_balance)))
+                        #     # print(res)
+                        #     # if re > 0:
+                        #     #     print(" YOUR PROFIT: ", re)
+                        #     # if re < 0:
+                        #     #     print(red + "YOUR LOSS: ", re)
+                        #     #     print(res)
+                        #     #
+                        #     # print(geen + "***************************************")
+                        #     # print(res)
+                        #     df = pd.DataFrame(
+                        #         columns=['grid_id', 'internal_status', 's', 'x', 'X', 'p', 'o', 'S', 'i',
+                        #                  'T', 'L', 'n', 'N', 'l', 'z'])
+                        #     # time.sleep(1)
+                        #     # print('OPERATE...')
+                        #     # cancel = 0
+                        #     # filled = 0
+                        #     # trades = 0
+                        #     # task_operate(nm, 0)
 
-                            time.sleep(1)
-
-                            print('OPERATE...')
-                            cancel = 0
-                            filled = 0
-                            trades = 0
-
-
-                    if (match == 0):
-                        print('[' + ('{:.4f}'.format(now)) + ']' + '    CANCELLED: ORDER ID: ' + str(
-                            orderId) + ' PRICE: ' + ('{:.4f}'.format(price)) + ' SIDE: ' + side)
+                    r = df.loc[df['i'] == orderId]
+                    if r.__len__() > 0:
+                        print('NO order for cancell ')
                     else:
-                        grilla.pop(match - 1)
-                        # yo me imagino que hay que saber que carajos orden (match-1) se murio y ver como carajos van las ordenes nuevas
+                        now = datetime.now()
+                        now = now.strftime("%H:%M:%S")
+                        print('-------------------')
+                        print('[' + now + ']' + 'cancelling order...')
+                        print('Order id: ', orderId)
+                        print('-------------------')
+                    try:
+                        df.at[r.index[0], 'grid_id'] = 0
 
-                        grilla = sorting_list(grilla)
+                        # df.at[r.index[0], 'L'] = lastExecutedPrice
+                        # df.at[r.index[0], 'n'] = commissionAmount
+                        df.at[r.index[0], 's'] = gsymbol
+                        # df.at[r.index[0], 'N'] = commisionAsset
+                        # df.at[r.index[0], 'l'] = lastExecutedQuantity
+                        # df.at[r.index[0], 'z'] = cumulativeFilledQuantity
+                        df.at[r.index[0], 'x'] = currentExecutionType
+                        df.at[r.index[0], 'X'] = currentOrderStatus
+                        df.at[r.index[0], 'internal_status'] = 5
+                        df.at[r.index[0], 'T'] = timestamp
+                        df.at[r.index[0], 'i'] = orderId
+                        df.at[r.index[0], 'p'] = float(price)
+                    except Exception as e:
+                        pass
+                    finally:
+                        pass
 
-            print(grilla)
-            print(type(grilla))
 
         except Exception as e:
-            #print(e)
-            raise
-            #self.statusbar.showMessage("ERROR {} Fetching WS ORDERS...".format(e))
-
+            print(e)
+            self.statusbar.showMessage("ERROR {} Fetching WS ORDERS...".format(e))
+        finally:
+            pass
             # print('wo', orders)
         # print(orders[0])
 
         # self.logText.append(str(df))
         # self.logText.append('----------------')
 
-
-def sorting_list(nested_list):
-    sorted_list = sorted(nested_list, key=operator.itemgetter(2))
-    for i in range(0, len(sorted_list)):
-        sorted_list[i][0] = i
-    return sorted_list
-
-
-def order_match(orderId_):
-    global grilla
-    global steps
-    match = 0
-    steps = len(grilla)
-    for i in range(0, steps):
-        if (grilla[i][1] == orderId_):
-            match = (i + 1)
-    return match
+    return

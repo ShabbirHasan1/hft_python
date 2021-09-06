@@ -1,6 +1,7 @@
 import time
-from utils import message_status
 
+import gvars
+from utils import message_status
 price_ticker = None
 balance = None
 
@@ -8,12 +9,16 @@ balance = None
 async def wticker(self):
     self.statusbar.showMessage("Fetching PRICE...")
     while True:
+        if gvars.disconnect == 1:
+            print('disconnect from ticker')
+            break
+
         try:
             global price_ticker
-            self.ticker = await self.exchange.watch_ticker(self.symbol)
+            self.ticker = await gvars.exchange.watch_ticker(gvars.symbol)
             price_ticker = self.ticker['last']
             self.lcdTicker.display(self.ticker['last'])
-            await message_status(self, "New PRICE event...", 0.3)
+            # await message_status(self, "New PRICE event...", 0.3)
         except Exception as e:
             print(e)
             self.statusbar.showMessage("ERROR: '{}' Fetching WS TICKER...".format(e))
@@ -21,6 +26,7 @@ async def wticker(self):
         finally:
             # print('t')
             pass
+    return
 
         # self.addTableRow(self.orderTable, row_1)
         # /¡self.logText.append('<span style="color:white">{}</span>'.format(str(self.ticker['last'])))
@@ -48,9 +54,12 @@ async def wohlc(self, exchange):
         # print_ticker()
 
 
-async def fetchBalance(self, exchange):
+async def fetchBalance(self):
     try:
-        b = await self.exchange.fetchBalance()
+        if gvars.disconnect == 1:
+            await gvars.exchange.close()
+            return
+        b = await gvars.exchange.fetchBalance()
         self.statusbar.showMessage("Fetching Balance...")
         self.walletcapitalLCD.display(b['USDT']['free'])
         self.usedcapitalLcd.display(b['USDT']['used'])
@@ -63,21 +72,26 @@ async def fetchBalance(self, exchange):
         self.statusbar.showMessage("ERROR {} Fetching BALANCE...".format(e))
     finally:
         print('fb')
+    return
     # print(bal)
 
 
-async def loadm(self, ex, exchange):
+async def loadm(self, ):
     self.statusbar.showMessage("Fetching Markets...")
-    ex.load_markets()
-    await exchange.load_markets()
+    gvars.ex.load_markets()
+    await gvars.exchange.load_markets()
+    return
 
 
-async def wbalance(self, exchange):
+async def wbalance(self):
     while True:
         global balance
+        if gvars.disconnect == 1:
+            await self.exchange.close()
+            break
         try:
             self.statusbar.showMessage("Fetching WS Balance...")
-            bal = await self.exchange.watchBalance()
+            bal = await gvars.exchange.watchBalance()
             self.walletcapitalLCD.display(bal['USDT']['free'])
             # x = {'info': {'e': 'ACCOUNT_UPDATE', 'T': 1630546431781, 'E': 1630546431784,
             #           'a': {'B': [{'a': 'USDT', 'wb': '9996.63709378', 'cw': '9947.27881141', 'bc': '0'}], 'P': [
@@ -88,7 +102,7 @@ async def wbalance(self, exchange):
             # print( bal['info']['a'])
             try:
                 balance = bal['info']['a']['P'][0]['pa']
-                print('BALANCE EW WATCHBALANCE: ', bal['info']['a']['P'][0]['pa'])
+                # print('BALANCE EW WATCHBALANCE: ', bal['info']['a']['P'][0]['pa'])
             except Exception as e:
                 print('problem in balance socket ', e)
 
@@ -100,7 +114,7 @@ async def wbalance(self, exchange):
             pass
             # print('wb')
 
-        now = exchange.milliseconds()
+        # now = gvars.exchange.milliseconds()
         # # start color code
         # print(bal)
         try:
@@ -117,6 +131,7 @@ async def wbalance(self, exchange):
             pass
         finally:
             pass
+    return
             # print('wb -e ')
 
 

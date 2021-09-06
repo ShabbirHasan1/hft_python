@@ -3,18 +3,23 @@ import random
 import time
 from time import sleep
 from PyQt5.QtCore import QRunnable
-import wsorders
 
+import gvars
+grilla = []
 
 class OrepeatsRunnable(QRunnable):
-    def __init__(self, symbol, obj, exchange):
+    def __init__(self, obj):
         super().__init__()
-        self.symbol = symbol
+        self.symbol = gvars.symbol
         self.obj = obj
-        self.exchange = exchange
+        self.exchange = gvars.ex
 
     def run(self):
+        global grilla
         while True:
+            if gvars.disconnect == 1:
+                print('disconnect from repeats')
+                break
             sleep(random.uniform(2.1, 4.3))
             grilla = self.order_list()
             grilla_size = len(grilla)
@@ -46,6 +51,8 @@ class OrepeatsRunnable(QRunnable):
                     grilla.pop(match - 1)
                     grilla = self.sorting_list(grilla)
 
+        return
+
     def sorting_list(self, nested_list):
         sorted_list = sorted(nested_list, key=operator.itemgetter(2))
         for i in range(0, len(sorted_list)):
@@ -73,8 +80,8 @@ class OrepeatsRunnable(QRunnable):
     def order_match(self, order_id_):
         global steps
         match = 0
-        steps = len(wsorders.grilla)
+        steps = len(grilla)
         for i in range(0, steps):
-            if wsorders.grilla[i][1] == order_id_:
+            if grilla[i][1] == order_id_:
                 match = (i + 1)
         return match

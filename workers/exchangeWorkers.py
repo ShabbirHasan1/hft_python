@@ -1,24 +1,26 @@
 import random
+import sys
 from time import sleep
 from PyQt5.QtCore import QRunnable
+import gvars
+
 
 class PositionRiskRunnable(QRunnable):
-    def __init__(self, symbol, ex, obj, stopfapi):
+    def __init__(self, obj):
         super().__init__()
-        self.symbol = symbol
-        self.exchange = ex
+        self.symbol = gvars.symbol
+        self.exchange = gvars.ex
         self.obj = obj
-        self.stopfapi = stopfapi
 
     def run(self):
-        if self.stopfapi:
-            print('salí')
-            return
-
         self.exchange.loadMarkets()
         self.obj.liquidationPriceLCD.setStyleSheet("color: yellow;")
         while True:
-            sleep(random.uniform(1.5, 3.3))
+            if gvars.disconnect == 1:
+                print('disconnect from pnl')
+                break
+
+            sleep(random.uniform(3.5, 6.3))
             try:
                 pos = self.exchange.fapiPrivate_get_positionrisk()  # or fapiPrivate_get_positionrisk()
                 market = self.exchange.market(self.symbol)['id']
@@ -63,5 +65,7 @@ class PositionRiskRunnable(QRunnable):
 
 
             except Exception as e:
-                print('ERROR EN RUNABLE DE FAPIPOSITIONr ', e)
+                if isinstance(e, RuntimeError):
+                    sys.exit()
+                print('ERROR IN RUNABLE DE FAPIPOSITION ', e)
         return

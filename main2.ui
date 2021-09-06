@@ -783,7 +783,7 @@
            <property name="geometry">
             <rect>
              <x>10</x>
-             <y>250</y>
+             <y>210</y>
              <width>281</width>
              <height>111</height>
             </rect>
@@ -924,7 +924,7 @@ color: rgb(156, 0, 0);</string>
              <x>10</x>
              <y>9</y>
              <width>281</width>
-             <height>221</height>
+             <height>191</height>
             </rect>
            </property>
            <property name="frameShape">
@@ -939,7 +939,7 @@ color: rgb(156, 0, 0);</string>
               <x>10</x>
               <y>10</y>
               <width>121</width>
-              <height>61</height>
+              <height>51</height>
              </rect>
             </property>
             <property name="text">
@@ -950,7 +950,7 @@ TO EXCHANGE</string>
              <bool>false</bool>
             </property>
            </widget>
-           <widget class="QPushButton" name="disconnectButton">
+           <widget class="QPushButton" name="checkButton">
             <property name="enabled">
              <bool>true</bool>
             </property>
@@ -959,11 +959,11 @@ TO EXCHANGE</string>
               <x>150</x>
               <y>10</y>
               <width>121</width>
-              <height>61</height>
+              <height>51</height>
              </rect>
             </property>
             <property name="text">
-             <string>DISCONNECT</string>
+             <string>CHECK</string>
             </property>
            </widget>
            <widget class="QPushButton" name="hftrestartButton">
@@ -973,9 +973,9 @@ TO EXCHANGE</string>
             <property name="geometry">
              <rect>
               <x>150</x>
-              <y>80</y>
+              <y>70</y>
               <width>121</width>
-              <height>61</height>
+              <height>51</height>
              </rect>
             </property>
             <property name="text">
@@ -989,9 +989,9 @@ TO EXCHANGE</string>
             <property name="geometry">
              <rect>
               <x>10</x>
-              <y>80</y>
+              <y>70</y>
               <width>121</width>
-              <height>61</height>
+              <height>51</height>
              </rect>
             </property>
             <property name="text">
@@ -1005,9 +1005,9 @@ TO EXCHANGE</string>
             <property name="geometry">
              <rect>
               <x>10</x>
-              <y>150</y>
+              <y>130</y>
               <width>121</width>
-              <height>61</height>
+              <height>51</height>
              </rect>
             </property>
             <property name="text">
@@ -1022,9 +1022,9 @@ TO EXCHANGE</string>
             <property name="geometry">
              <rect>
               <x>150</x>
-              <y>150</y>
+              <y>130</y>
               <width>121</width>
-              <height>61</height>
+              <height>51</height>
              </rect>
             </property>
             <property name="styleSheet">
@@ -1039,7 +1039,7 @@ TO EXCHANGE</string>
            <property name="geometry">
             <rect>
              <x>10</x>
-             <y>380</y>
+             <y>330</y>
              <width>281</width>
              <height>111</height>
             </rect>
@@ -1126,7 +1126,7 @@ TO EXCHANGE</string>
            <property name="geometry">
             <rect>
              <x>10</x>
-             <y>510</y>
+             <y>450</y>
              <width>281</width>
              <height>111</height>
             </rect>
@@ -1248,6 +1248,32 @@ color: rgb(156, 0, 0);</string>
              <string>SL SELL</string>
             </property>
            </widget>
+          </widget>
+          <widget class="QPushButton" name="disconnectButton">
+           <property name="geometry">
+            <rect>
+             <x>10</x>
+             <y>570</y>
+             <width>131</width>
+             <height>51</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>DISCONNECT</string>
+           </property>
+          </widget>
+          <widget class="QPushButton" name="pushButton_5">
+           <property name="geometry">
+            <rect>
+             <x>160</x>
+             <y>570</y>
+             <width>131</width>
+             <height>51</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>EXIT</string>
+           </property>
           </widget>
          </widget>
          <widget class="QWidget" name="tab_3">

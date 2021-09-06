@@ -1,14 +1,15 @@
 import random
 from time import sleep
 from PyQt5.QtCore import QRunnable
+import gvars
 
 
 class MarginRunnable(QRunnable):
-    def __init__(self, symbol, exchange, obj, operation):
+    def __init__(self, obj, operation):
         super().__init__()
-        self.symbol = symbol
+        self.symbol = gvars.symbol
         self.obj = obj
-        self.exchange = exchange
+        self.exchange = gvars.ex
         self.operation = operation
 
     def run(self):
@@ -25,7 +26,7 @@ class MarginRunnable(QRunnable):
             self.obj.addmarginText.setText('')
             # print(margin)
         except Exception as e:
-            print('PEO EN ADD MARGIN ', e)
+            print('ERROR IN MARGIN: ', e)
         return
 
     def reducemargin(self):
@@ -35,5 +36,5 @@ class MarginRunnable(QRunnable):
             # print(margin)
             self.obj.reducemarginText.setText('')
         except Exception as e:
-            print('PEO EN REDUCE MARGIN ', e)
+            print('ERROR IN MARGIN: ', e)
         return

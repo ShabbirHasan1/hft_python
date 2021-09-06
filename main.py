@@ -19,11 +19,14 @@ from workers.marginWorkers import MarginRunnable
 from workers.orepeatsWorker import OrepeatsRunnable
 
 from readConf import readgrids
+import orderManaging
 from orderManaging import hftinit, h, callo
 from sockets import wbalance, fetchBalance, loadm, wticker
+from workers.simetryWorker import SimetryRunnable
 from wsorders import worders
 from utils import message_status, pandasModel
 import sockets
+import gvars
 
 ui, _ = loadUiType('main2.ui')
 
@@ -39,30 +42,26 @@ factor = None
 steps = None
 api_key = None
 api_id = None
-order_data = None
-testnet = True
-disconnect = 0
+testnet = False
+gvars.disconnect = 0
 stopfapi = False
 
+
 class MainApp(QtWidgets.QMainWindow, ui):
-    def __init__(self, exchange):
-        global order_data
+    def __init__(self):
         QtWidgets.QMainWindow.__init__(self)
         self.setupUi(self)
         self.model = pandasModel(None)
-        self.exchange = exchange
-        self.ex = ex
-        # self.pools = Pool(processes=12)
-        # asyncio.ensure_future(self.startsockets())
-        # asyncio.ensure_future()
-        self.activehftLabel.setText(grids[0][1])
-        self.exchangeLabel.setText(grids[0][9])
-        self.thresholdLabel.setText(str(grids[0][4]))
-        self.leverageLabel.setText(grids[0][7])
-        self.marginLabel.setText(grids[0][8])
-        self.symbolLabel.setText(grids[0][12])
-        self.symbol = grids[0][12]
 
+        self.activehftLabel.setText(gvars.hftname)
+        self.exchangeLabel.setText(gvars.exchangename )
+        self.thresholdLabel.setText(str(gvars.threshold))
+        self.leverageLabel.setText(gvars.leverage)
+        self.marginLabel.setText(gvars.margintype)
+        self.symbolLabel.setText(symbol)
+
+        self.symbol = symbol
+        self.grids = grids
         # self.button1.clicked.connect(self.melo)
         self.connectButton.clicked.connect(self.unclick)
         self.hftinitButton.clicked.connect(self.initi)
@@ -70,39 +69,45 @@ class MainApp(QtWidgets.QMainWindow, ui):
         self.hftrestartButton.clicked.connect(self.reiniti)
         self.closetradeButton.clicked.connect(self.remove)
         self.testnetCheck.stateChanged.connect(self.enabletestnet)
-        self.disconnectButton.clicked.connect(self.discon)
+        self.checkButton.clicked.connect(self.simerty)
 
         self.addmarginButton.clicked.connect(self.add_margin)
         self.reducemarginButton.clicked.connect(self.reduce_margin)
+        self.disconnectButton.clicked.connect(self.discon)
 
         self.objects = self
-        self.pnl(symbol, ex)
-        self.duplicates()
+        # self.pnl(symbol, ex)
+        # self.duplicates()
+        # self.simerty()
 
     def discon(self):
-        rin = PositionRiskRunnable(symbol, ex, self.objects, True)
+        gvars.disconnect = 1
+
+
+    def simerty(self):
+        pool = QThreadPool.globalInstance()
+        runnable = SimetryRunnable(self.objects)
+        pool.start(runnable)
 
     def duplicates(self):
         pool = QThreadPool.globalInstance()
-        runnable = OrepeatsRunnable(self.symbol, self.objects, self.ex)
+        runnable = OrepeatsRunnable(self.objects)
         pool.start(runnable)
 
     def add_margin(self):
         pool = QThreadPool.globalInstance()
-        runnable = MarginRunnable(symbol, self.ex, self.objects, 'add')
+        runnable = MarginRunnable(self.objects, 'add')
         pool.start(runnable)
 
     def reduce_margin(self):
         pool = QThreadPool.globalInstance()
-        runnable = MarginRunnable(symbol, self.ex, self.objects, 'reduce')
+        runnable = MarginRunnable(self.objects, 'reduce')
         pool.start(runnable)
-
-
 
     def pnl(self, symbol, ex):
         threadCount = QThreadPool.globalInstance().maxThreadCount()
         pool = QThreadPool.globalInstance()
-        runnable = PositionRiskRunnable(symbol, ex, self.objects, stopfapi)
+        runnable = PositionRiskRunnable(self.objects)
         pool.start(runnable)
 
     def enabletestnet(self):
@@ -124,34 +129,37 @@ class MainApp(QtWidgets.QMainWindow, ui):
             self.save()
 
     def callo(self, ):
-        x = ex.cancel_all_orders(self.symbol)
+        orderManaging.start_trade = 0
+        x = gvars.ex.cancel_all_orders(self.symbol)
 
     def unclick(self):
         return asyncio.ensure_future(self.startsockets())
 
     def initi(self):
-        order_data = {'factor': grids[0][5], 'threshold': grids[0][4], 'symbol': grids[0][12],
-                      'steps': grids[0][6], 'amount': grids[0][3], 'ticker': sockets.price_ticker,
+
+        order_data = {'factor': gvars.factor, 'threshold': gvars.threshold, 'symbol': gvars.symbol,
+                      'steps': gvars.steps, 'amount': gvars.amount, 'ticker': sockets.price_ticker,
                       'center': None}
 
-        h(order_data, ex)
+        h(order_data)
 
     def reiniti(self):
-        order_data = {'factor': grids[0][5], 'threshold': grids[0][4], 'symbol': grids[0][12],
-                      'steps': grids[0][6], 'amount': grids[0][3], 'ticker': sockets.price_ticker,
+
+        order_data = {'factor': gvars.factor, 'threshold': gvars.threshold, 'symbol': gvars.symbol,
+                      'steps': gvars.steps, 'amount': gvars.amount, 'ticker': sockets.price_ticker,
                       'center': sockets.price_ticker}
         self.callo()
-        hftinit(order_data, ex)
+        hftinit(order_data)
 
     async def startsockets(self, ):
         await asyncio.gather(
-            loadm(self, ex, exchange),
+            loadm(self, ),
             wticker(self),
-            wbalance(self, exchange),
-            fetchBalance(self, exchange),
-            worders(self, exchange, amount, threshold, symbol, factor, ex, int(steps)
-                    ),
+            wbalance(self, ),
+            fetchBalance(self, ),
+            worders(self,),
         )
+
 
 if __name__ == "__main__":
     grids = readgrids()
@@ -162,46 +170,53 @@ if __name__ == "__main__":
     qss = QtCore.QTextStream(File)
     # setup stylesheet
     app.setStyleSheet(qss.readAll())
-    loop = QEventLoop(app)
-    symbol = grids[0][12]
-    amount = grids[0][3]
-    threshold = grids[0][4]
-    steps = grids[0][6]
-    factor = grids[0][5]
 
-    exchange = ccxtpro.binance(
+    loop = QEventLoop(app)
+
+    gvars.symbol = grids[0][12]
+    gvars.amount = grids[0][3]
+    gvars.threshold = grids[0][4]
+    gvars.steps = grids[0][6]
+    gvars.factor = grids[0][5]
+    gvars.hftname = grids[0][1]
+    gvars.exchangename = grids[0][9]
+    gvars.leverage = grids[0][7]
+    gvars.margintype = grids[0][8]
+    gvars.api_key = grids[0][10]
+    gvars.secret = grids[0][11]
+
+    gvars.exchange = ccxtpro.binance(
         {
             'asyncio_loop': loop,
             'newUpdates': True,
-            'apiKey': grids[0][10],
-            'secret': grids[0][11],
+            'apiKey': gvars.api_key,
+            'secret': gvars.secret,
             'enableRateLimit': True,  # https://github.com/ccxt/ccxt/wiki/Manual#rate-limit
             'options': {
                 'defaultType': 'future',
             },
         })
     if testnet:
-        exchange.set_sandbox_mode(True)
+        gvars.exchange.set_sandbox_mode(True)
     else:
-        exchange.set_sandbox_mode(False)
-
-    ex = ccxt.binance(
+        gvars.exchange.set_sandbox_mode(False)
+    gvars.ex = ccxt.binance(
         {
             'newUpdates': True,
-            'apiKey': grids[0][10],
-            'secret': grids[0][11],
+            'apiKey': gvars.api_key,
+            'secret': gvars.secret,
             'enableRateLimit': True,  # https://github.com/ccxt/ccxt/wiki/Manual#rate-limit
             'options': {
                 'defaultType': 'future',
             },
         })
     if testnet:
-        ex.set_sandbox_mode(True)
+        gvars.ex.set_sandbox_mode(True)
     else:
-        ex.set_sandbox_mode(False)
+        gvars.ex.set_sandbox_mode(False)
 
     asyncio.set_event_loop(loop)
-    window = MainApp(exchange)
+    window = MainApp()
     window.show()
     with loop:
         loop.run_forever()
