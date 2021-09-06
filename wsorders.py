@@ -1,5 +1,6 @@
 import json
 import threading
+import time
 from datetime import datetime
 
 from sockets import positionrisk
@@ -11,7 +12,6 @@ import sockets
 import gvars
 
 cancel_global = 0
-
 
 async def worders(self):
     gamount = gvars.amount
@@ -35,6 +35,38 @@ async def worders(self):
             break
         try:
             jsonx = await exchange.watchOrders()
+
+            if gvars.init == 1:
+                cancel = 0
+                filled = 0
+                df = None
+                df = pd.DataFrame(
+                    columns=['internal_status', 's', 'x', 'X', 'p', 'o', 'S', 'i', 'T', 'L', 'n', 'N', 'l', 'z'])
+                gvars.restart = 0
+                gvars.init = 0
+
+            if gvars.restart == 1:
+                cancel = 0
+                filled = 1
+                df = None
+                df = pd.DataFrame(
+                    columns=['internal_status', 's', 'x', 'X', 'p', 'o', 'S', 'i', 'T', 'L', 'n', 'N', 'l', 'z'])
+                gvars.restart = 0
+
+            # if filled == 1 and sockets.balance == 0:
+            #     filled = 0
+            #     cancel = 0
+            #     df = None
+            #     df = pd.DataFrame(
+            #         columns=['internal_status', 's', 'x', 'X', 'p', 'o', 'S', 'i', 'T', 'L', 'n', 'N', 'l', 'z'])
+            #     time.sleep(1)
+            #     order_data = {'factor': gvars.factor, 'threshold': gvars.threshold, 'symbol': gvars.symbol,
+            #                   'steps': gvars.steps, 'amount': gvars.amount, 'ticker': sockets.price_ticker,
+            #                   'center': None}
+            #     nt = threading.Thread(target=orderManaging.h, args=(order_data))
+            #     nt.start()
+            #
+
 
             currentExecutionType = jsonx[0]['info']['x']
             currentOrderStatus = jsonx[0]['info']['X']
@@ -87,153 +119,189 @@ async def worders(self):
                     print('*  A UPDATED ', side, 'FROM NEW A FILLED ID:    *', orderId)
 
                     if side == 'BUY' and filled == 0:
+                        t = None
                         count = 0
                         print('-------------------')
                         print('BUY TRADE FILLED ON ZERO')
                         buycero = df.loc[(df['internal_status'] == 0) & (df['S'] == 'BUY')]
                         buycero.sort_values('p', inplace=True, ascending=True)
-                        price = float(df.iloc[buycero.index[0]]['p']) - threshold
+                        priceb = float(df.iloc[buycero.index[0]]['p']) - threshold
                         # print('MORE LOW BUY ORDER PRICE: ', df.iloc[buycero.index[0]]['p'])
                         # print('MAKING BUY ORDER AT PRICE  ', price)
-                        t = threading.Thread(target=puts, args=(gsymbol, 'BUY', gamount, price))
+                        t = threading.Thread(target=puts, args=(gsymbol, 'BUY', gamount, priceb))
                         t.start()
                         # task_puto.delay(api_key, api_id, symbol, 'LIMIT', 'BUY', amount, price, e)
 
                         print('-------------------')
 
                     if side == 'SELL' and filled == 0:
+                        t = None
                         count = 0
                         print('-------------------')
                         print('SELL TRADE FILLED ON ZERO')
                         sellcero = df.loc[(df['internal_status'] == 0) & (df['S'] == 'SELL')]
                         sellcero.sort_values('p', inplace=True, ascending=False)
-                        price = float(df.iloc[sellcero.index[0]]['p']) + threshold
+                        prices = float(df.iloc[sellcero.index[0]]['p']) + threshold
                         # print('MORE HIGH SELL ORDER PRICE: ', df.iloc[sellcero.index[0]]['p'])
                         # print('MAKING SELL ORDER AT PRICE  ', price)
-                        t = threading.Thread(target=puts, args=(gsymbol, 'SELL', gamount, price))
+                        t = threading.Thread(target=puts, args=(gsymbol, 'SELL', gamount, prices))
                         t.start()
                         # task_puto.delay(api_key, api_id, symbol, 'LIMIT', 'SELL', amount, price, e)
                         print('-------------------')
 
-                        if side == 'BUY' and filled == 1:
-                            if type != 'MARKET':
+                    if side == 'BUY' and filled == 1:
+                        if type != 'MARKET':
 
-                                print('THERE HAS BEEN A BUY')
-                                print('ORDER ID:  ', orderId)
-                                print('BALANCE  ', sockets.balance)
-                                # print('TRADES  ', trades)
-                                if sockets.balance == 0:
-                                    # trades = trades + 1
-                                    n = datetime.now()
-                                    # print(geen)
-                                    # done = str(n.strftime("%b - %d - %Y %H:%M:%S"))
-                                    # print("***********************************************************")
-                                    print("GRID FINISHED IN BUY ")
-                                    # print("GRID START IN {0} ".format(
-                                    #     str(grid_start_time)))
-                                    # print("GRID STOP IN  {0} ".format(done))
-                                    # print("TRADES = {0} ".format(trades))
-                                    # print("INITIAL BALANCE = {0} ".format(initial_balance))
-                                    # print("***********************************************************")
-                                    # print(res)
-                                    # # dataframe_end_time = str(n.strftime("%b_%d_%Y_%H_%M"))
-                                    # df = df[df['x'] != 'CANCELED']
-                                    # # task_dataframe_to_csv(df, str(dataframe_start_time), str(dataframe_end_time))
-                                    # task_cancelallorders(api_key, api_id, symbol)
-                                    # cancel = 1
-                                    # filled = 0
-                                    # trades = 0
-                                    # print(res)
-                                else:
-                                    cancel = 0
-                                    trades = trades + 1
-                                    p = float(price) + threshold
-                                    now = datetime.now()
+                            print('THERE HAS BEEN A BUY')
+                            print('ORDER ID:  ', orderId)
+                            print('BALANCE  ', sockets.balance)
+                            # print('TRADES  ', trades)
+                            if sockets.balance == 0:
+                                cancel = 1
+                                filled = 0
+                                cancel = 0
+                                df = None
+                                df = pd.DataFrame(
+                                    columns=['internal_status', 's', 'x', 'X', 'p', 'o', 'S', 'i', 'T', 'L', 'n',
+                                             'N', 'l', 'z'])
+                                time.sleep(2)
+                                order_data = {'factor': gvars.factor, 'threshold': gvars.threshold,
+                                              'symbol': gvars.symbol,
+                                              'steps': gvars.steps, 'amount': gvars.amount,
+                                              'ticker': sockets.price_ticker,
+                                              'center': None}
+                                nt = threading.Thread(target=orderManaging.h, args=(order_data))
+                                nt.start()
 
-                                    n = now.strftime("%H:%M:%S")
-                                    print('[' + n + '] MAKING SELL ORDER  ON CENTER:  ', float(p))
-                                    t = threading.Thread(target=puts, args=(gsymbol, 'SELL', gamount, float(p)))
-                                    t.start()
 
-                                    # task_puto.delay(api_key, api_id, symbol, 'LIMIT', 'SELL', float(amount), float(p))
-                                    cbuy = df.loc[(df['internal_status'] == 0) & (df['S'] == 'SELL')]
-                                    cbuy.sort_values('p', inplace=True, ascending=False)
-                                    oid = df.iloc[cbuy.index[0]]['i']
-                                    print('[' + n + ']  CANCELING THE LAST SELL ORDER : ', oid)
+                                # trades = trades + 1
+                                n = datetime.now()
+                                # print(geen)
+                                # done = str(n.strftime("%b - %d - %Y %H:%M:%S"))
+                                # print("***********************************************************")
+                                print("GRID FINISHED IN BUY ")
+                                # print("GRID START IN {0} ".format(
+                                #     str(grid_start_time)))
+                                # print("GRID STOP IN  {0} ".format(done))
+                                # print("TRADES = {0} ".format(trades))
+                                # print("INITIAL BALANCE = {0} ".format(initial_balance))
+                                # print("***********************************************************")
+                                # print(res)
+                                # # dataframe_end_time = str(n.strftime("%b_%d_%Y_%H_%M"))
+                                # df = df[df['x'] != 'CANCELED']
+                                # # task_dataframe_to_csv(df, str(dataframe_start_time), str(dataframe_end_time))
+                                # task_cancelallorders(api_key, api_id, symbol)
+                                # cancel = 1
+                                # filled = 0
+                                # trades = 0
+                                # print(res)
+                            else:
+                                t = None
+                                cancel = 0
 
-                                    # e = 1
-                                    # task_cancelorder.delay(api_key, api_id, oid, symbol)
-                                    # e = 0
-                                    puto = df.loc[(df['internal_status'] == 0) & (df['S'] == 'BUY')]
-                                    puto.sort_values('p', inplace=True, ascending=True)
-                                    price = float(df.iloc[puto.index[0]]['p']) - threshold
+                                p = float(price) + threshold
+                                now = datetime.now()
 
-                                    print('[' + n + ']' + 'PUT BUY ORDER AT BOTTOM  ', p)
-                                    t = threading.Thread(target=puts, args=(gsymbol, 'BUY', gamount, price))
-                                    t.start()
-                                    # task_puto.delay(api_key, api_id, symbol, 'LIMIT', 'BUY', amount, price, e)
+                                n = now.strftime("%H:%M:%S")
+                                print('[' + n + '] MAKING SELL ORDER  ON CENTER:  ', float(p))
+                                t = threading.Thread(target=puts, args=(gsymbol, 'SELL', gamount, float(p)))
+                                t.start()
 
-                                    # PONER UN SELL  (BUY + Tthreshold) y borrar el primer sell
+                                # task_puto.delay(api_key, api_id, symbol, 'LIMIT', 'SELL', float(amount), float(p))
+                                cbuy = df.loc[(df['internal_status'] == 0) & (df['S'] == 'SELL')]
+                                cbuy.sort_values('p', inplace=True, ascending=False)
+                                oid = df.iloc[cbuy.index[0]]['i']
+                                print('[' + n + ']  CANCELING THE LAST SELL ORDER : ', oid)
 
-                        if side == 'SELL' and filled == 1:
-                            if type != 'MARKET':
-                                print('THERE AS BEEN A SELL ')
-                                print('ORDER ID:  ', orderId)
-                                print('BALANCE    ', sockets.balance)
+                                # e = 1
+                                # task_cancelorder.delay(api_key, api_id, oid, symbol)
+                                # e = 0
+                                puto = df.loc[(df['internal_status'] == 0) & (df['S'] == 'BUY')]
+                                puto.sort_values('p', inplace=True, ascending=True)
+                                pricefb = float(df.iloc[puto.index[0]]['p']) - threshold
 
-                                if sockets.balance == 0:
-                                    # trades = trades + 1
-                                    # n = datetime.now()
-                                    # done = str(n.strftime("%b - %d - %Y %H:%M:%S"))
-                                    print("***********************************************************")
-                                    print("GRID FINISHED IN SELL")
-                                    # print("GRID START IN {0}".format(str(grid_start_time)))
-                                    # print("GRID STOP IN  {0}".format(done))
-                                    # print("TRADES = {0}".format(trades))
-                                    # print("***********************************************************")
-                                    # print(res)
-                                    # dataframe_end_time = str(n.strftime("%b_%d_%Y_%H_%M"))
-                                    # df = df[df['x'] != 'CANCELED']
-                                    # # task_dataframe_to_csv(df, str(dataframe_start_time), str(dataframe_end_time))
-                                    # task_cancelallorders(api_key, api_id, symbol)
-                                    # cancel = 1
-                                    # filled = 0
-                                    # trades = 0
+                                print('[' + n + ']' + 'PUT BUY ORDER AT BOTTOM  ', p)
+                                t = threading.Thread(target=puts, args=(gsymbol, 'BUY', gamount, pricefb))
+                                t.start()
+                                # task_puto.delay(api_key, api_id, symbol, 'LIMIT', 'BUY', amount, price, e)
 
-                                else:
-                                    cancel = 0
-                                    trades = trades + 1
-                                    p = float(price) - threshold
-                                    now = datetime.now()
-                                    n = now.strftime("%H:%M:%S")
-                                    print('[' + n + ']' + ' MAKING BUY ORDER ON CENTER:  ', float(p))
-                                    t = threading.Thread(target=puts, args=(gsymbol, 'BUY', gamount, p))
-                                    t.start()
-                                    # task_puto.delay(api_key, api_id, symbol, 'LIMIT', 'BUY', amount, p)
-                                    csell = df.loc[(df['internal_status'] == 0) & (df['S'] == 'BUY')]
-                                    csell.sort_values('p', inplace=True, ascending=True)
-                                    # print(csell)
-                                    oid = df.iloc[csell.index[0]]['i']
-                                    print('[' + n + ']' + 'CANCEL BUY ORDER AT BOTTOM: ', oid)
+                                # PONER UN SELL  (BUY + Tthreshold) y borrar el primer sell
 
-                                    # e = 1
-                                    # task_cancelorder.delay(api_key, api_id, oid, symbol)
-                                    # e = 0
-                                    puto = df.loc[(df['internal_status'] == 0) & (df['S'] == 'SELL')]
-                                    puto.sort_values('p', inplace=True, ascending=False)
-                                    price = float(df.iloc[puto.index[0]]['p']) + threshold
-                                    # exchange.create_order(symbol, 'LIMIT', 'SELL', amount, p)
-                                    n = now.strftime("%H:%M:%S")
+                    if side == 'SELL' and filled == 1:
+                        if type != 'MARKET':
+                            print('THERE AS BEEN A SELL ')
+                            print('ORDER ID:  ', orderId)
+                            print('BALANCE    ', sockets.balance)
 
-                                    print('[' + n + ']' + 'PUT SELL ORDER  AT TOP  ', p)
+                            if sockets.balance == 0:
+                                cancel = 1
+                                cancel = 1
+                                filled = 0
+                                cancel = 0
+                                df = None
+                                df = pd.DataFrame(
+                                    columns=['internal_status', 's', 'x', 'X', 'p', 'o', 'S', 'i', 'T', 'L', 'n',
+                                             'N', 'l', 'z'])
+                                time.sleep(2)
+                                order_data = {'factor': gvars.factor, 'threshold': gvars.threshold,
+                                              'symbol': gvars.symbol,
+                                              'steps': gvars.steps, 'amount': gvars.amount,
+                                              'ticker': sockets.price_ticker,
+                                              'center': None}
+                                nt = threading.Thread(target=orderManaging.h, args=(order_data))
+                                nt.start()
+                                # trades = trades + 1
+                                # n = datetime.now()
+                                # done = str(n.strftime("%b - %d - %Y %H:%M:%S"))
+                                print("***********************************************************")
+                                print("GRID FINISHED IN SELL")
+                                # print("GRID START IN {0}".format(str(grid_start_time)))
+                                # print("GRID STOP IN  {0}".format(done))
+                                # print("TRADES = {0}".format(trades))
+                                # print("***********************************************************")
+                                # print(res)
+                                # dataframe_end_time = str(n.strftime("%b_%d_%Y_%H_%M"))
+                                # df = df[df['x'] != 'CANCELED']
+                                # # task_dataframe_to_csv(df, str(dataframe_start_time), str(dataframe_end_time))
+                                # task_cancelallorders(api_key, api_id, symbol)
+                                # cancel = 1
+                                # filled = 0
+                                # trades = 0
 
-                                    t = threading.Thread(target=puts, args=(gsymbol, 'SELL', gamount, price))
-                                    t.start()
-                                    # task_puto.delay(api_key, api_id, symbol, 'LIMIT', 'SELL', amount, price, e)
+                            else:
+                                t = None
+                                cancel = 0
+                                p = float(price) - threshold
+                                now = datetime.now()
+                                n = now.strftime("%H:%M:%S")
+                                print('[' + n + ']' + ' MAKING BUY ORDER ON CENTER:  ', float(p))
+                                t = threading.Thread(target=puts, args=(gsymbol, 'BUY', gamount, p))
+                                t.start()
+                                # task_puto.delay(api_key, api_id, symbol, 'LIMIT', 'BUY', amount, p)
+                                csell = df.loc[(df['internal_status'] == 0) & (df['S'] == 'BUY')]
+                                csell.sort_values('p', inplace=True, ascending=True)
+                                # print(csell)
+                                oid = df.iloc[csell.index[0]]['i']
+                                print('[' + n + ']' + 'CANCEL BUY ORDER AT BOTTOM: ', oid)
 
-                                    # PONER UN BUY  (SELL - Tthreshold) y borrar el ultimo buy
+                                # e = 1
+                                # task_cancelorder.delay(api_key, api_id, oid, symbol)
+                                # e = 0
+                                puto = df.loc[(df['internal_status'] == 0) & (df['S'] == 'SELL')]
+                                puto.sort_values('p', inplace=True, ascending=False)
+                                price = float(df.iloc[puto.index[0]]['p']) + threshold
+                                # exchange.create_order(symbol, 'LIMIT', 'SELL', amount, p)
+                                n = now.strftime("%H:%M:%S")
 
-                        filled = 1
+                                print('[' + n + ']' + 'PUT SELL ORDER  AT TOP  ', p)
+
+                                t = threading.Thread(target=puts, args=(gsymbol, 'SELL', gamount, price))
+                                t.start()
+                                # task_puto.delay(api_key, api_id, symbol, 'LIMIT', 'SELL', amount, price, e)
+
+                                # PONER UN BUY  (SELL - Tthreshold) y borrar el ultimo buy
+
+                    filled = 1
 
             if currentExecutionType == 'CANCELED':
 
@@ -241,33 +309,13 @@ async def worders(self):
                     # r = df.loc[df['i'] == order_id]
                     if cancel == 1:
                         pass
-                        # oo = exchange.fetch_open_orders(gsymbol)
-                        # if oo.__len__() == 0:
-                        #     df.drop(df.index, inplace=True)
-                        #     # final_balance = exchange.fetch_balance()
-                        #     # final_balance = final_balance['USDT']['free']
-                        #     # re = final_balance - initial_balance
-                        #     # print(geen + "***************************************")
-                        #     # print("INITIAL BALANCE = {0}".format(str(initial_balance)))
-                        #     # print("FINAL BALANCE = {0}".format(str(final_balance)))
-                        #     # print(res)
-                        #     # if re > 0:
-                        #     #     print(" YOUR PROFIT: ", re)
-                        #     # if re < 0:
-                        #     #     print(red + "YOUR LOSS: ", re)
-                        #     #     print(res)
-                        #     #
-                        #     # print(geen + "***************************************")
-                        #     # print(res)
-                        #     df = pd.DataFrame(
-                        #         columns=['grid_id', 'internal_status', 's', 'x', 'X', 'p', 'o', 'S', 'i',
-                        #                  'T', 'L', 'n', 'N', 'l', 'z'])
-                        #     # time.sleep(1)
-                        #     # print('OPERATE...')
-                        #     # cancel = 0
-                        #     # filled = 0
-                        #     # trades = 0
-                        #     # task_operate(nm, 0)
+                        oo = exchange.fetch_open_orders(gsymbol)
+                        if oo.__len__() == 0:
+                            df.drop(df.index, inplace=True)
+
+                            cancel = 0
+                            filled = 0
+
 
                     r = df.loc[df['i'] == orderId]
                     if r.__len__() > 0:
@@ -295,11 +343,13 @@ async def worders(self):
                         df.at[r.index[0], 'i'] = orderId
                         df.at[r.index[0], 'p'] = float(price)
                     except Exception as e:
-                        pass
+                        print('EN SOCKETS CANCELL, ', e)
                     finally:
                         pass
 
+            self.orderTable.setModel(pandasModel(df))
 
+            # pools.apply_async(sockets.pplm, (self, gsymbol, ex), )
         except Exception as e:
             print(e)
             self.statusbar.showMessage("ERROR {} Fetching WS ORDERS...".format(e))

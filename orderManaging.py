@@ -141,56 +141,58 @@ def hftinit(data):
     ticker = data['ticker']
     center = data['center']
 
-    if factor == 0:
-        ticker = int(ticker)
-    else:
-        ticker = (int((int(ticker * factor)) / 5) * 5) / factor
+    if gvars.restart == 1:
+        if factor == 0:
+            ticker = int(ticker)
+        else:
+            ticker = (int((int(ticker * factor)) / 5) * 5) / factor
 
-    if center != None:
-        x = center
-        low = x - (threshold * (steps))
-    else:
-        x = ticker
-        low = x - (threshold * (steps - 1))
+        if center != None:
+            x = center
+            low = x - (threshold * (steps))
+        else:
+            x = ticker
+            low = x - (threshold * (steps - 1))
 
-    print('CERO: ', x)
-    # Armo la lista en orden para que tenga todos los datos de la grid, antes de inicializarla
-    side = 'BUY'
-    for buy in range(steps):
-        temporal = []
-        temporal.append(buy)
-        temporal.append(low)
-        temporal.append(side)
-        grid.append(temporal)
-        low = low + threshold
+        print('CERO: ', x)
+        # Armo la lista en orden para que tenga todos los datos de la grid, antes de inicializarla
+        side = 'BUY'
+        for buy in range(steps):
+            temporal = []
+            temporal.append(buy)
+            temporal.append(low)
+            temporal.append(side)
+            grid.append(temporal)
+            low = low + threshold
 
-    if center != None:
-        low = low + threshold
+        if center != None:
+            low = low + threshold
 
-    side = 'SELL'
-    for sell in range((steps), (steps * 2)):
-        temporal = []
-        temporal.append(sell)
-        temporal.append(low)
-        temporal.append(side)
-        grid.append(temporal)
-        low = low + threshold
+        side = 'SELL'
+        for sell in range((steps), (steps * 2)):
+            temporal = []
+            temporal.append(sell)
+            temporal.append(low)
+            temporal.append(side)
+            grid.append(temporal)
+            low = low + threshold
 
-    for buy in range(steps):
-        time.sleep(0.1)
-        sell = (steps * 2) - buy - 1
+        for buy in range(steps):
+            time.sleep(0.1)
+            sell = (steps * 2) - buy - 1
 
-        # s = await exchange.
-        # (symbol, 'LIMIT', grid[sell][2], amount, grid[sell][1])
-        # b = await exchange.create_order(symbol, 'LIMIT', grid[buy][2], amount, grid[buy][1])
-        thread = threading.Thread(target=put,
-                                  args=(sell, symbol, grid[sell][2], amount, grid[sell][1], exchange))
-        thread.start()
-        time.sleep(0.1)
-        thread = threading.Thread(target=put, args=(buy, symbol, grid[buy][2], amount, grid[buy][1], exchange))
-        thread.start()
+            # s = await exchange.
+            # (symbol, 'LIMIT', grid[sell][2], amount, grid[sell][1])
+            # b = await exchange.create_order(symbol, 'LIMIT', grid[buy][2], amount, grid[buy][1])
+            thread = threading.Thread(target=put,
+                                      # symbol, dir, amount, price
+                                      args=(sell, symbol, grid[sell][2], amount, grid[sell][1]))
+            thread.start()
+            time.sleep(0.1)
+            thread = threading.Thread(target=put, args=(buy, symbol, grid[buy][2], amount, grid[buy][1]))
+            thread.start()
 
-    start_trade = 1
+        start_trade = 1
     return
 
 

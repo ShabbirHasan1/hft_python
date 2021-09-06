@@ -101,7 +101,8 @@ async def wbalance(self):
             #  'free': {'USDT': None}, 'used': {'USDT': None}, 'total': {'USDT': 9996.63709378}}
             # print( bal['info']['a'])
             try:
-                balance = bal['info']['a']['P'][0]['pa']
+                if len(bal) > 0:
+                    balance = bal['info']['a']['P'][0]['pa']
                 # print('BALANCE EW WATCHBALANCE: ', bal['info']['a']['P'][0]['pa'])
             except Exception as e:
                 print('problem in balance socket ', e)

@@ -42,7 +42,7 @@ factor = None
 steps = None
 api_key = None
 api_id = None
-testnet = False
+testnet = True
 gvars.disconnect = 0
 stopfapi = False
 
@@ -54,7 +54,7 @@ class MainApp(QtWidgets.QMainWindow, ui):
         self.model = pandasModel(None)
 
         self.activehftLabel.setText(gvars.hftname)
-        self.exchangeLabel.setText(gvars.exchangename )
+        self.exchangeLabel.setText(gvars.exchangename)
         self.thresholdLabel.setText(str(gvars.threshold))
         self.leverageLabel.setText(gvars.leverage)
         self.marginLabel.setText(gvars.margintype)
@@ -82,7 +82,6 @@ class MainApp(QtWidgets.QMainWindow, ui):
 
     def discon(self):
         gvars.disconnect = 1
-
 
     def simerty(self):
         pool = QThreadPool.globalInstance()
@@ -130,7 +129,7 @@ class MainApp(QtWidgets.QMainWindow, ui):
 
     def callo(self, ):
         orderManaging.start_trade = 0
-        x = gvars.ex.cancel_all_orders(self.symbol)
+        x = gvars.ex.cancel_all_orders(gvars.symbol)
 
     def unclick(self):
         return asyncio.ensure_future(self.startsockets())
@@ -140,7 +139,7 @@ class MainApp(QtWidgets.QMainWindow, ui):
         order_data = {'factor': gvars.factor, 'threshold': gvars.threshold, 'symbol': gvars.symbol,
                       'steps': gvars.steps, 'amount': gvars.amount, 'ticker': sockets.price_ticker,
                       'center': None}
-
+        gvars.init = 1
         h(order_data)
 
     def reiniti(self):
@@ -148,7 +147,9 @@ class MainApp(QtWidgets.QMainWindow, ui):
         order_data = {'factor': gvars.factor, 'threshold': gvars.threshold, 'symbol': gvars.symbol,
                       'steps': gvars.steps, 'amount': gvars.amount, 'ticker': sockets.price_ticker,
                       'center': sockets.price_ticker}
+
         self.callo()
+        gvars.restart = 1
         hftinit(order_data)
 
     async def startsockets(self, ):
@@ -157,7 +158,7 @@ class MainApp(QtWidgets.QMainWindow, ui):
             wticker(self),
             wbalance(self, ),
             fetchBalance(self, ),
-            worders(self,),
+            worders(self, ),
         )
 
 

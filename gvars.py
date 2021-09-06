@@ -18,3 +18,5 @@ ex = None
 api_key = None
 secret = None
 filled = 0
+init = 0
+restart = 0

@@ -81,8 +81,8 @@ class SimetryRunnable(QRunnable):
                     print(buylist)
                     buylisttmp = buylist[-todrop:]
                     for i in range(0, len(buylisttmp)):
-                        self.exchange.cancel_order(buylisttmp[i][1], self.grids[0][12])
-                        sleep(1)
+                        self.exchange.cancel_order(buylisttmp[i][1], self.symbol)
+                        sleep(.2)
                 if len(buylist) < stepsbyside:
                     print('buylist is <')
                     first = None
@@ -90,7 +90,7 @@ class SimetryRunnable(QRunnable):
                     temp = None
                     first = buylist[len(buylist) - 1][2]
                     for i in range(0, stepsbyside):
-                        sleep(1)
+                        sleep(.1)
                         if x == 0:
                             temp = first
                             x = 1
@@ -99,7 +99,7 @@ class SimetryRunnable(QRunnable):
                         res = any(temp in sub for sub in buylist)
                         if not res:
                             self.exchange.create_order(symbol, 'LIMIT', 'BUY', amount, temp)
-                        sleep(1)
+                        sleep(.1)
                         # print(temp, res)
         return
         # st = int(self.grids[0][6])
