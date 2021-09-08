@@ -42,7 +42,7 @@ factor = None
 steps = None
 api_key = None
 api_id = None
-testnet = True
+testnet =  False
 gvars.disconnect = 0
 stopfapi = False
 
@@ -76,7 +76,7 @@ class MainApp(QtWidgets.QMainWindow, ui):
         self.disconnectButton.clicked.connect(self.discon)
 
         self.objects = self
-        # self.pnl(symbol, ex)
+        self.pnl(symbol, ex)
         # self.duplicates()
         # self.simerty()
 

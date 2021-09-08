@@ -20,7 +20,7 @@ class PositionRiskRunnable(QRunnable):
                 print('disconnect from pnl')
                 break
 
-            sleep(random.uniform(3.5, 6.3))
+            sleep(random.uniform(3.5, 12.3))
             try:
                 pos = self.exchange.fapiPrivate_get_positionrisk()  # or fapiPrivate_get_positionrisk()
                 market = self.exchange.market(self.symbol)['id']
